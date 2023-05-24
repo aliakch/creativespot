@@ -5,6 +5,8 @@ import { SessionProvider } from "next-auth/react";
 
 import { apiNext } from "@/utils/api";
 
+import "primereact/resources/primereact.min.css";
+import "@/styles/primereact.css";
 import "@/styles/globals.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
