@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "prisma.prisma",
+    "aaron-bond.better-comments",
+    "mikestead.dotenv",
+    "eamodio.gitlens",
+    "oderwat.indent-rainbow",
+    "visualstudioexptteam.vscodeintellicode",
+    "visualstudioexptteam.intellicode-api-usage-examples",
+    "visualstudioexptteam.vscodeintellicode-completions",
+    "yoavbls.pretty-ts-errors",
+    "gruntfuggly.todo-tree",
+    "trunk.io",
+    "dbaeumer.vscode-eslint"
+  ]
+}
