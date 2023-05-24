@@ -1,7 +1,7 @@
 .link::before {
   position: absolute;
   content: "";
-  height: 1px;
+  height: 2px;
   width: 100%;
   left: 0;
   bottom: -4px;
