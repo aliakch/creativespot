@@ -1,12 +1,12 @@
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
-  getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
+  getServerSession,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { env } from "@/env.mjs";
+import CredentialsProvider from "next-auth/providers/credentials";
+
 import { prisma } from "@/server/db";
 
 /**
@@ -47,9 +47,33 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      name: "Credentials",
+      id: "credentials",
+      credentials: {
+        // username: { label: "Username", type: "text", placeholder: "jsmith" },
+        email: { label: "Email", type: "text", placeholder: "test@gmail.com" },
+        password: {
+          label: "Password",
+          type: "password",
+          placeholder: "passwd",
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/require-await
+      async authorize(credentials) {
+        if (credentials) {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
+
+          if (user) {
+            return user;
+          }
+        }
+        return null;
+      },
     }),
     /**
      * ...add more providers here.
@@ -61,6 +85,9 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  session: {
+    strategy: "jwt",
+  },
 };
 
 /**
@@ -68,9 +95,9 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
+export const getServerAuthSession = async (ctx: {
   req: GetServerSidePropsContext["req"];
   res: GetServerSidePropsContext["res"];
 }) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
+  return await getServerSession(ctx.req, ctx.res, authOptions);
 };
