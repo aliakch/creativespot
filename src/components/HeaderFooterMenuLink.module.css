@@ -1,0 +1,14 @@
+.link::before {
+  position: absolute;
+  content: "";
+  height: 1px;
+  width: 100%;
+  left: 0;
+  bottom: -4px;
+  background: #ff4261;
+  opacity: 0;
+}
+.link:hover::before,
+.link:focus::before {
+  opacity: 1;
+}
