@@ -8,9 +8,8 @@ export default {
       padding: "1rem",
     },
     fontFamily: {
-      // body: "'Sera Pro', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
-      sans: ["Sera Pro", "sans-serif"],
-      body: ["Sera Pro", "sans-serif"],
+      sans: ["Cera Pro", "sans-serif"],
+      body: ["Cera Pro", "sans-serif"],
     },
     extend: {
       colors: {
