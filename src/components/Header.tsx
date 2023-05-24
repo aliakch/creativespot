@@ -38,12 +38,8 @@ export default function Header() {
             </div>
           </div>
           <div className="ml-auto hidden flex-wrap items-center justify-end gap-x-8 text-lg font-semibold lg:flex">
-            <CsButton type="link" href="/user/register">
-              Регистрация
-            </CsButton>
-            <CsButton type="link" href="/user/login">
-              Войти
-            </CsButton>
+            <CsButton>Регистрация</CsButton>
+            <CsButton>Войти</CsButton>
           </div>
           <div className="ml-auto block lg:hidden">
             <Hamburger toggled={isMenuOpen} toggle={setMenuOpen} color="#fff" />

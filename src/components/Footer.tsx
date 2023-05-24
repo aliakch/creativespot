@@ -41,9 +41,7 @@ export default function Footer() {
               </div>
             </div>
             <div>
-              <CsButton type="link" href="/user/register">
-                Зарегистрироваться
-              </CsButton>
+              <CsButton>Зарегистрироваться</CsButton>
             </div>
           </div>
         </div>

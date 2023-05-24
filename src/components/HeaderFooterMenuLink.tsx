@@ -13,7 +13,7 @@ const HeaderFooterMenuLink = ({ href, text }: HeaderFooterMenuLinkProps) => {
     <li
       className={`${styles.link} relative block text-lg font-medium text-white`}
     >
-      <Link href={href}>{text}</Link>
+      <p>{text}</p>
     </li>
   );
 };
