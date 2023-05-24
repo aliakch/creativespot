@@ -15,16 +15,7 @@ export default function Header() {
       <div className="container flex items-center">
         <div className="flex flex-wrap">
           <Link className="mr-14 flex flex-wrap items-center" href="/">
-            <Image
-              className="mr-8 block h-8 w-8 lg:h-12 lg:w-auto"
-              src={Logo}
-              alt=""
-              height={55}
-              width={55}
-            />
-            <h4 className="font-semibold text-white lg:text-xl">
-              CreativeSpot
-            </h4>
+            <Image className="mr-8 block h-7 w-auto" src={Logo} alt="" />
           </Link>
 
           <div className="hidden flex-wrap items-center justify-center lg:flex">

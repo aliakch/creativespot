@@ -13,14 +13,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-2">
           <div className="flex flex-wrap items-center">
             <div className="mb-4 mr-16 flex flex-wrap items-center lg:mb-0">
-              <Image
-                className="mr-5 block h-10 w-10 lg:h-14 lg:w-14"
-                src={Logo}
-                height={55}
-                width={55}
-                alt="Лого"
-              />
-              <h4 className="text-xl font-bold text-white">CreativeSpot</h4>
+              <Image className="mr-5 block h-8 w-auto" src={Logo} alt="Лого" />
             </div>
             <p className="hidden text-white lg:block">
               Найдите свою площадку и <br />
