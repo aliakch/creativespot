@@ -67,4 +67,40 @@ export const userRouter = createTRPCRouter({
         message: "Проищошла ошибка при добавлении пользователя",
       });
     }),
+  toggleFavorite: protectedProcedure
+    .input(z.object({ platformId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const email = ctx.session.user.email;
+      if (email) {
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+          select: {
+            id: true,
+            favorites: true,
+          },
+        });
+        if (user) {
+          if (user.favorites.includes(input.platformId)) {
+            user.favorites = user.favorites.filter(
+              (el) => el !== input.platformId
+            );
+          } else {
+            user.favorites.push(input.platformId);
+          }
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              favorites: {
+                set: user.favorites,
+              },
+            },
+          });
+          return { status: "ok" };
+        }
+      }
+      return { status: "error" };
+    }),
 });

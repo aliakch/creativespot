@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
+import Like from "@/images/Like.svg";
 import MetroIcon from "@/images/MetroIcon.svg";
+import { apiClient } from "@/utils/api";
 import { getPrettyPrice } from "@/utils/platform-helper";
 
 import type { Estate, Metro } from "@prisma/client";
@@ -18,21 +21,43 @@ export default function PropertyListingCard({
   item: EstateWithMetro;
 }) {
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
+  const [isFavorite, setFavorite] = useState(false);
 
+  const toggleFavorite = async () => {
+    const response = await apiClient.users.toggleFavorite.query({
+      platformId: item.id,
+    });
+    if (response.status === "ok") {
+      setFavorite(!isFavorite);
+    }
+  };
   return (
     <div className="flex flex-wrap">
-      {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
-      <Link className="photo block" href={`/platforms/${item.code}`}>
-        {item.photo_cover && (
-          <Image
-            src={item.photo_cover}
-            alt={item.name}
-            width={400}
-            height={300}
-            className="w-full rounded-t-xl"
-          />
-        )}
-      </Link>
+      <div className="relative">
+        {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+        <Link className="photo block" href={`/platforms/${item.code}`}>
+          {item.photo_cover && (
+            <Image
+              src={item.photo_cover}
+              alt={item.name}
+              width={400}
+              height={300}
+              className="w-full rounded-t-xl"
+            />
+          )}
+        </Link>
+        <Image
+          onClick={() => {
+            void toggleFavorite();
+          }}
+          src={Like}
+          alt="В избранное"
+          className={`favorites-btn absolute h-8 w-8 ${
+            isFavorite ? "active" : ""
+          }`}
+        />
+      </div>
+
       <div className="w-full rounded-b-xl border-t-0 border-cs-dark-500 bg-cs-dark-800 p-3 pb-5">
         <Link
           className="mb-2 inline-block text-sm font-medium"
