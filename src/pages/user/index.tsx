@@ -7,7 +7,7 @@ import AccountLayout from "@/layouts/AccountLayout";
 import { apiClient } from "@/utils/api";
 
 export default function UserDashboardPage() {
-  const { data: sessionData, status } = useSession();
+  const { status } = useSession();
   const [userData, setUserData] = useState<User | null>(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function UserDashboardPage() {
     if (status === "authenticated") {
       void fetchUserData();
     }
-  });
+  }, []);
 
   return (
     <AccountLayout selectedOption="general" role="leaseholder">
