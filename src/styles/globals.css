@@ -17,3 +17,6 @@
 .favorites-btn:not(:hover, .active) {
   filter: saturate(70%) grayscale(10%) contrast(70%);
 }
+.p-component {
+  font-family: "Cera Pro", "sans-serif";
+}
