@@ -3,10 +3,29 @@ import { TRPCError } from "@trpc/server";
 import { hashSync } from "bcryptjs";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { prisma } from "@/server/db";
 
 export const userRouter = createTRPCRouter({
+  me: protectedProcedure.query(async ({ ctx }) => {
+    const email = ctx.session.user.email;
+    if (email == null) {
+      throw new TRPCError({
+        message: "Не задан адрес e-mail",
+        code: "PARSE_ERROR",
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    return user;
+  }),
   register: publicProcedure
     .input(
       z.object({

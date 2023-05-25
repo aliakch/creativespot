@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { type MouseEventHandler } from "react";
 
 interface CsButtonProps {
   className?: string;
@@ -7,6 +8,7 @@ interface CsButtonProps {
   href?: string;
   rounded?: boolean;
   filled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
 }
 
 const CsButton = ({
@@ -16,6 +18,7 @@ const CsButton = ({
   href,
   rounded = true,
   filled = false,
+  onClick,
 }: CsButtonProps) => {
   const classNames = [
     "border-2",
@@ -41,7 +44,9 @@ const CsButton = ({
   return (
     <>
       {(type === "button" || typeof href !== "string") && (
-        <button className={classNameString}>{children}</button>
+        <button onClick={onClick} className={classNameString}>
+          {children}
+        </button>
       )}
       {type === "link" && typeof href === "string" && (
         <Link className={classNameString} href={href}>

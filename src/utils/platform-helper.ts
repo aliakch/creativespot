@@ -12,4 +12,8 @@ const getPrettyPrice = (price: number): string => {
     .join(" ");
 };
 
-export { getArrayChunk, getPrettyPrice };
+const getPrettyUserName = (firstName: string, lastName: string) => {
+  return `${firstName} ${lastName.slice(0, 1).toLocaleUpperCase()}.`;
+};
+
+export { getArrayChunk, getPrettyPrice, getPrettyUserName };

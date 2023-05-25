@@ -37,13 +37,16 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, token, user }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          randomKey: token.randomKey,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -51,7 +54,6 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       id: "credentials",
       credentials: {
-        // username: { label: "Username", type: "text", placeholder: "jsmith" },
         email: { label: "Email", type: "text", placeholder: "test@gmail.com" },
         password: {
           label: "Password",
@@ -59,7 +61,6 @@ export const authOptions: NextAuthOptions = {
           placeholder: "passwd",
         },
       },
-      // eslint-disable-next-line @typescript-eslint/require-await
       async authorize(credentials) {
         if (credentials) {
           const user = await prisma.user.findUnique({
