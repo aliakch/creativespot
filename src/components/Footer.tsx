@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 import Logo from "@/images/Logo.svg";
 
@@ -7,6 +8,8 @@ import CsButton from "./CsButton";
 import HeaderFooterMenuLink from "./HeaderFooterMenuLink";
 
 export default function Footer() {
+  const { status } = useSession();
+
   return (
     <footer className="my-14">
       <div className="container">
@@ -24,8 +27,8 @@ export default function Footer() {
             </p>
           </div>
           <div className="ml-auto hidden flex-wrap items-center lg:flex">
-            <div className="mr-24 flex items-center justify-center">
-              <div className="flex flex-wrap gap-16">
+            <div className="items-center justify-center">
+              <div className="flex flex-wrap gap-8 xl:gap-16">
                 <HeaderFooterMenuLink href="/about" text="О нас" />
                 <HeaderFooterMenuLink
                   href="/#how-it-works"
@@ -33,11 +36,13 @@ export default function Footer() {
                 />
               </div>
             </div>
-            <div>
-              <CsButton type="link" href="/user/register">
-                Зарегистрироваться
-              </CsButton>
-            </div>
+            {status !== "authenticated" && (
+              <div className="ml-12 xl:ml-24">
+                <CsButton type="link" href="/user/register">
+                  Зарегистрироваться
+                </CsButton>
+              </div>
+            )}
           </div>
         </div>
       </div>
