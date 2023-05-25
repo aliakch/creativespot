@@ -23,6 +23,9 @@ export const userRouter = createTRPCRouter({
       where: {
         email,
       },
+      include: {
+        user_role: true,
+      },
     });
     return user;
   }),
@@ -34,7 +37,7 @@ export const userRouter = createTRPCRouter({
         password_confirmation: z.string(),
         first_name: z.string(),
         last_name: z.string(),
-        // role: z.string(),
+        role: z.string(),
       })
     )
     .query(async ({ input }) => {
@@ -45,8 +48,8 @@ export const userRouter = createTRPCRouter({
         });
       }
       const roles = (await prisma.userRole.findMany()) as unknown as UserRole[];
-      const clientRole = roles.find((el) => el.name === "leaseholder");
-      if (clientRole) {
+      const role = roles.find((el) => el.name === input.role);
+      if (role) {
         const userData: Prisma.UserCreateInput = {
           login: input.email,
           email: input.email,
@@ -54,7 +57,7 @@ export const userRouter = createTRPCRouter({
           is_active: true,
           first_name: input.first_name,
           last_name: input.last_name,
-          user_role: { connect: { id: clientRole.id } },
+          user_role: { connect: { id: role.id } },
         };
         const user = await prisma.user.create({
           data: userData,

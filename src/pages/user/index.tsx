@@ -1,14 +1,15 @@
-import { type User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import CsAvatar from "@/components/CsAvatar";
 import AccountLayout from "@/layouts/AccountLayout";
+import { type Role, type UserWithRole } from "@/types/user";
 import { apiClient } from "@/utils/api";
+import { getRoleNameByCode } from "@/utils/platform-helper";
 
 export default function UserDashboardPage() {
   const { status } = useSession();
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserWithRole | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -30,7 +31,7 @@ export default function UserDashboardPage() {
                 {userData.first_name} {userData.last_name}
               </h5>
               <p className="text-lg font-medium uppercase text-cs-primary">
-                Арендатор
+                {getRoleNameByCode(userData.user_role.name as Role)}
               </p>
               <p className="text-white">
                 <span className="mr-3 font-medium">Почта:</span>

@@ -44,6 +44,7 @@ export default function SignInPage({ providers, loginError }) {
           <div className="flex flex-col gap-2">
             <label htmlFor="email">Адрес e-mail</label>
             <InputText
+              className="p-inputtext-sm"
               id="email"
               value={values.email}
               onChange={(e) => {
@@ -54,6 +55,7 @@ export default function SignInPage({ providers, loginError }) {
           <div className="flex flex-col gap-2">
             <label htmlFor="password">Пароль</label>
             <Password
+              className="p-inputtext-sm"
               id="password"
               value={values.password}
               onChange={(e) => {
