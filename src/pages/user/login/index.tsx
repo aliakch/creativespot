@@ -36,8 +36,11 @@ export default function SignInPage({ providers, loginError }) {
 
   return (
     <MainLayout>
-      <div className="container flex">
-        <div className="flex w-[400px] flex-col gap-4">
+      <div className="container flex items-center justify-center">
+        <div className="flex w-[400px] flex-col gap-4 rounded-xl bg-cs-dark-800 p-12">
+          <h2 className="mb-4 text-center text-3xl font-bold text-white">
+            Войти
+          </h2>
           <div className="flex flex-col gap-2">
             <label htmlFor="email">Адрес e-mail</label>
             <InputText
