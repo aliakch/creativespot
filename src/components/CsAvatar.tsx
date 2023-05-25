@@ -5,7 +5,7 @@ const CsAvatar = ({
 }: {
   label: string;
   className?: string;
-  size: "generic" | "big";
+  size?: "generic" | "big";
 }) => {
   const letter = label.slice(0, 1);
   const classes = className ?? "";
