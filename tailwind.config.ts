@@ -22,6 +22,7 @@ export default {
         "cs-dark-800": "#2D2D2D",
         "cs-dark-900": "#000106",
         "cs-red": "#CE4438",
+        "cs-red-dark": "#471A21",
       },
     },
     screens: {
