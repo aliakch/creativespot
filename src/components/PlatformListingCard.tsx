@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import Like from "@/images/Like.svg";
@@ -22,6 +23,7 @@ export default function PropertyListingCard({
 }) {
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
   const [isFavorite, setFavorite] = useState(false);
+  const { status } = useSession();
 
   const toggleFavorite = async () => {
     const response = await apiClient.users.toggleFavorite.query({
@@ -46,16 +48,18 @@ export default function PropertyListingCard({
             />
           )}
         </Link>
-        <Image
-          onClick={() => {
-            void toggleFavorite();
-          }}
-          src={Like}
-          alt="В избранное"
-          className={`favorites-btn absolute h-8 w-8 ${
-            isFavorite ? "active" : ""
-          }`}
-        />
+        {status === "authenticated" && (
+          <Image
+            onClick={() => {
+              void toggleFavorite();
+            }}
+            src={Like}
+            alt="В избранное"
+            className={`favorites-btn absolute h-8 w-8 ${
+              isFavorite ? "active" : ""
+            }`}
+          />
+        )}
       </div>
 
       <div className="w-full rounded-b-xl border-t-0 border-cs-dark-500 bg-cs-dark-800 p-3 pb-5">
