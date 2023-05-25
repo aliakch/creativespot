@@ -70,6 +70,27 @@ export const userRouter = createTRPCRouter({
         message: "Произошла ошибка при добавлении пользователя",
       });
     }),
+  reviews: protectedProcedure.query(async ({ ctx }) => {
+    const email = ctx.session.user.email;
+    if (email) {
+      const user = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+        select: {
+          id: true,
+          favorites: true,
+        },
+      });
+      if (user) {
+        const reviews = await prisma.userReview.findMany({
+          where: { userId: user.id },
+        });
+
+        return { status: "ok", reviews };
+      }
+    }
+  }),
   toggleFavorite: protectedProcedure
     .input(z.object({ platformId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
