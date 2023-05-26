@@ -20,3 +20,41 @@
 .p-component {
   font-family: "Cera Pro", "sans-serif";
 }
+
+.p-autocomplete input {
+  width: 100%;
+}
+
+.dzu-dropzone {
+  padding: 2rem;
+  color: #a1a1a1;
+  font-size: 0.825rem;
+}
+
+.dzu-dropzone input {
+  display: none;
+}
+
+.dzu-previewContainer {
+  position: relative;
+}
+
+.dzu-previewContainer img {
+  border-radius: 1rem;
+}
+
+.dzu-previewStatusContainer {
+  padding: 1rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border-radius: 0.5rem;
+  background: #2d2d2d;
+  line-height: 1;
+}
+
+.dzu-previewButton {
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+}

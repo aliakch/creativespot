@@ -15,7 +15,7 @@ export default function MyPlatformsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const results = await apiClient.platforms.favorites.query();
+      const results = await apiClient.platforms.getMine.query();
       if (results.status === "ok") {
         setPlatforms(results.items);
       }

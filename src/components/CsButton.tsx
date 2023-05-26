@@ -5,6 +5,7 @@ interface CsButtonProps {
   className?: string;
   children: React.ReactNode;
   type?: "link" | "button";
+  buttonType?: "button" | "submit";
   href?: string;
   rounded?: boolean;
   filled?: boolean;
@@ -15,6 +16,7 @@ const CsButton = ({
   className,
   children,
   type = "button",
+  buttonType = "button",
   href,
   rounded = true,
   filled = false,
@@ -44,7 +46,7 @@ const CsButton = ({
   return (
     <>
       {(type === "button" || typeof href !== "string") && (
-        <button onClick={onClick} className={classNameString}>
+        <button type={buttonType} onClick={onClick} className={classNameString}>
           {children}
         </button>
       )}

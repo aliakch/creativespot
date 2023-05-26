@@ -20,6 +20,11 @@ export const env = createEnv({
       // VERCEL_URL doesn't include `https` so it cant be validated as a URL
       process.env.VERCEL ? z.string().min(1) : z.string().url()
     ),
+    NEXT_PUBLIC_MINIO_DOMAIN: z.string(),
+    NEXT_PUBLIC_MINIO_PORT: z.string(),
+    NEXT_PUBLIC_MINIO_USE_SSL: z.enum(["true", "false"]),
+    NEXT_PUBLIC_MINIO_ACCESS_KEY: z.string(),
+    NEXT_PUBLIC_MINIO_SECRET_KEY: z.string(),
   },
 
   /**
@@ -40,5 +45,10 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXT_PUBLIC_MINIO_DOMAIN: process.env.NEXT_PUBLIC_MINIO_DOMAIN,
+    NEXT_PUBLIC_MINIO_PORT: process.env.NEXT_PUBLIC_MINIO_PORT,
+    NEXT_PUBLIC_MINIO_USE_SSL: process.env.NEXT_PUBLIC_MINIO_USE_SSL,
+    NEXT_PUBLIC_MINIO_ACCESS_KEY: process.env.NEXT_PUBLIC_MINIO_ACCESS_KEY,
+    NEXT_PUBLIC_MINIO_SECRET_KEY: process.env.NEXT_PUBLIC_MINIO_SECRET_KEY,
   },
 });

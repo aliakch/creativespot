@@ -1,3 +1,4 @@
+import { type Metro } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -7,8 +8,105 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { prisma } from "@/server/db";
+import { generateCode } from "@/utils/string-helper";
 
 export const platformRouter = createTRPCRouter({
+  add: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(3),
+        platform_type: z.object({
+          code: z.string(),
+          id: z.string(),
+          name: z.string(),
+        }),
+        description: z.string(),
+        price: z.number(),
+        area: z.number(),
+        metro: z.string(),
+        address: z.string(),
+        photo_cover: z.string(),
+        photo_gallery: z.string().array(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const email = ctx.session.user.email!;
+      const user = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+        select: {
+          id: true,
+          favorites: true,
+        },
+      });
+      const metroStation = (await prisma.metro.findFirst({
+        where: {
+          name: input.metro,
+        },
+      })) as unknown as Metro;
+      if (user) {
+        const platform = await prisma.estate.create({
+          data: {
+            name: input.name,
+            area: input.area,
+            code: generateCode(input.name),
+            description: input.description,
+            price: input.price,
+            address: input.address,
+            photo_cover: input.photo_cover,
+            photo_gallery: input.photo_gallery,
+            user: {
+              connect: { id: user.id },
+            },
+            estate_type: {
+              connect: { id: input.platform_type.id },
+            },
+            metro: {
+              connect: { id: metroStation.id },
+            },
+          },
+        });
+        return platform;
+      }
+    }),
+  getPlatformTypes: protectedProcedure.query(async () => {
+    return await prisma.estateType.findMany();
+  }),
+  getMetro: protectedProcedure.query(async () => {
+    const stations = await prisma.metro.findMany();
+    return stations;
+  }),
+  getMine: protectedProcedure.query(async ({ ctx }) => {
+    const email = ctx.session.user.email;
+    if (email == null) {
+      throw new TRPCError({
+        message: "Не задан адрес e-mail",
+        code: "PARSE_ERROR",
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        favorites: true,
+      },
+    });
+    if (user) {
+      const platforms = await prisma.estate.findMany({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          metro: true,
+        },
+      });
+      return { status: "ok", items: platforms };
+    }
+    return { status: "error" };
+  }),
   favorites: protectedProcedure.query(async ({ ctx }) => {
     const email = ctx.session.user.email;
     if (email == null) {
