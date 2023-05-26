@@ -11,7 +11,7 @@ const useMe = () => {
 
   const getMe = async () => {
     const userData =
-      (await apiClient.users.me.query()) as unknown as UserWithRole;
+      (await apiClient.users.me.query()) as unknown as UserWithRole | null;
     if (userData) {
       setMe(userData);
     }
