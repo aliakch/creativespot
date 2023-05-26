@@ -70,6 +70,34 @@ export const platformRouter = createTRPCRouter({
         return platform;
       }
     }),
+  getByCode: protectedProcedure
+    .input(
+      z.object({
+        code: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const platform = await prisma.estate.findFirst({
+        where: {
+          code: input.code,
+        },
+        include: {
+          estate_type: true,
+          metro: true,
+          user: true,
+        },
+      });
+      return platform;
+    }),
+  getAdditional: protectedProcedure.query(async ({ input }) => {
+    const additionalPlatforms = await prisma.estate.findMany({
+      take: 3,
+      include: {
+        metro: true,
+      },
+    });
+    return additionalPlatforms;
+  }),
   getPlatformTypes: protectedProcedure.query(async () => {
     return await prisma.estateType.findMany();
   }),

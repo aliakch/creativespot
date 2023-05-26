@@ -34,7 +34,7 @@ export type PlatformPopulatedWithDates = Estate & {
 
 export type PlatformPopulated = Estate & {
   estate_type: EstateType;
-  user: UserWithTimestamps;
+  user: User;
   metro: Metro | null;
 };
 

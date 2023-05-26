@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { useMe } from "@/hooks/useMe";
 import Like from "@/images/Like.svg";
 import MetroIcon from "@/images/MetroIcon.svg";
 import { apiClient } from "@/utils/api";
@@ -24,6 +25,15 @@ export default function PropertyListingCard({
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
   const [isFavorite, setFavorite] = useState(false);
   const { status } = useSession();
+  const me = useMe();
+
+  useEffect(() => {
+    if (me) {
+      if (me.favorites.some((el) => el === item.id)) {
+        setFavorite(true);
+      }
+    }
+  }, [me]);
 
   const toggleFavorite = async () => {
     const response = await apiClient.users.toggleFavorite.query({
