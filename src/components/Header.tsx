@@ -7,29 +7,23 @@ import React, { useEffect, useState } from "react";
 
 import CsButton from "@/components/CsButton";
 import HeaderFooterMenuLink from "@/components/HeaderFooterMenuLink";
+import { useMe } from "@/hooks/useMe";
 import Logo from "@/images/Logo.svg";
-import { apiClient } from "@/utils/api";
 import { getPrettyUserName } from "@/utils/platform-helper";
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const { data: sessionData, status } = useSession();
+  const { status } = useSession();
+
+  const me = useMe();
 
   const [userFullName, setUserFullName] = useState("");
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userData = await apiClient.users.me.query();
-      if (userData) {
-        setUserFullName(
-          getPrettyUserName(userData.first_name, userData.last_name)
-        );
-      }
-    };
-    if (status === "authenticated") {
-      void fetchUserData();
+    if (me) {
+      setUserFullName(getPrettyUserName(me.first_name, me.last_name));
     }
-  });
+  }, [me]);
 
   return (
     <header className="py-4 lg:mb-4">
