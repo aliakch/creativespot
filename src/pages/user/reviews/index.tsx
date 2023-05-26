@@ -29,7 +29,7 @@ export default function ReviewsPage() {
       {me !== false && (
         <AccountLayout selectedOption="general" role={me.user_role.name}>
           {reviews.length === 0 && (
-            <h4 className="text-xl font-semibold text-white">
+            <h4 className="mb-8 text-3xl font-bold text-white">
               У вас пока нет отзывов.
             </h4>
           )}
