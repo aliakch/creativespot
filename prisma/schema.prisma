@@ -64,6 +64,7 @@ model User {
   favorites       String[]
   reviews         UserReview[]
   Estate          Estate[]
+  chats           Chat[]
   created_at      DateTime     @default(now())
   updated_at      DateTime     @default(now())
 }
@@ -113,6 +114,11 @@ model Metro {
   name   String
   code   String
   Estate Estate[]
+}
+
+model Chat {
+  id    String @id @unique @default(cuid())
+  users   User[]
 }
 
 model VerificationToken {

@@ -8,6 +8,8 @@ import React, { useEffect, useState } from "react";
 import CsButton from "@/components/CsButton";
 import HeaderFooterMenuLink from "@/components/HeaderFooterMenuLink";
 import { useMe } from "@/hooks/useMe";
+import HeaderChatIcon from "@/images/HeaderChatIcon.svg";
+import LikeDark from "@/images/LikeDark.svg";
 import Logo from "@/images/Logo.svg";
 import { getPrettyUserName } from "@/utils/platform-helper";
 
@@ -42,7 +44,7 @@ export default function Header() {
             </div>
           </div>
         </div>
-        <div className="ml-auto hidden flex-wrap items-center justify-end gap-x-8 text-lg font-semibold lg:flex">
+        <div className="ml-auto hidden flex-wrap items-center justify-end gap-x-4 text-lg font-semibold lg:flex">
           {status !== "authenticated" && (
             <>
               <CsButton type="link" href="/user/register">
@@ -55,6 +57,14 @@ export default function Header() {
           )}
           {status === "authenticated" && userFullName !== "" && (
             <>
+              <Link className="block" href="/user/favorites">
+                <Image src={LikeDark} alt="" height={40} width={40} />
+              </Link>
+              <Link className="block" href="messages">
+                <div className="flex h-10 w-10 items-center justify-center">
+                  <Image src={HeaderChatIcon} alt="" height={22} width={22} />
+                </div>
+              </Link>
               <CsButton type="link" href="/user/">
                 {userFullName}
               </CsButton>

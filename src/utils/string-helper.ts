@@ -12,4 +12,8 @@ const generateCode = (input: string) => {
   return crypto.randomUUID();
 };
 
-export { generateCode };
+const generateChatId = (str1: string, str2: string) => {
+  return str1.localeCompare(str2) ? `${str1}_${str2}` : `${str2}_${str1}`;
+};
+
+export { generateCode, generateChatId };

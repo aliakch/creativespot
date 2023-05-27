@@ -9,6 +9,8 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { prisma } from "@/server/db";
+import { redis } from "@/server/redis";
+import { generateChatId } from "@/utils/string-helper";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -219,5 +221,53 @@ export const userRouter = createTRPCRouter({
         status: "error",
         message: "Пользователь не найден",
       };
+    }),
+  getChats: protectedProcedure.query(async ({ ctx }) => {
+    const email = ctx.session.user.email as unknown as string;
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (user) {
+      const results = await prisma.chat.findMany({
+        where: { users: { some: { id: user.id } } },
+        include: {
+          users: true,
+        },
+      });
+      return results;
+    }
+  }),
+  getChatHistory: protectedProcedure
+    .input(
+      z.object({
+        peer: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const email = ctx.session.user.email as unknown as string;
+      const user = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (user) {
+        const threadId = generateChatId(user.id, input.peer);
+        const thread = await redis.lRange(threadId, 0, -1);
+        return thread;
+      }
+    }),
+  getById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const user = await prisma.user.findFirst({ where: { id: input.id } });
+      if (user) {
+        return user;
+      }
     }),
 });

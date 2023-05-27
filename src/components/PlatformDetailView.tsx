@@ -107,7 +107,12 @@ export default function PlatformDetailView({
                   </span>
                 </p>
                 <div className="flex items-center justify-center">
-                  <CsButton className="text-sm" rounded>
+                  <CsButton
+                    className="text-sm"
+                    rounded
+                    type="link"
+                    href={`/messages/?id=${item.user.id}`}
+                  >
                     Написать сообщение
                   </CsButton>
                 </div>
