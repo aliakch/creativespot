@@ -9,6 +9,14 @@ import { generateCode } from "@/utils/string-helper";
 interface FilterQueryOptions {
   estate_type?: { id: string };
   metro?: { id: string };
+  price?: {
+    lte?: number;
+    gte?: number;
+  };
+  area?: {
+    lte?: number;
+    gte?: number;
+  };
 }
 
 export const platformRouter = createTRPCRouter({
@@ -116,6 +124,10 @@ export const platformRouter = createTRPCRouter({
             name: z.string(),
           })
           .optional(),
+        price_from: z.number().optional(),
+        price_to: z.number().optional(),
+        area_from: z.number().optional(),
+        area_to: z.number().optional(),
       })
     )
     .query(async ({ input }) => {
@@ -135,6 +147,28 @@ export const platformRouter = createTRPCRouter({
           id: metroStations.find((el) => el.code === input.metro.code)
             .id as unknown as string,
         };
+      }
+      if (input.price_from ?? input.price_to) {
+        query.price = {};
+      }
+      if (input.price_from) {
+        // @ts-expect-error all ok
+        query.price.gte = input.price_from;
+      }
+      if (input.price_to) {
+        // @ts-expect-error all ok
+        query.price.lte = input.price_to;
+      }
+      if (input.area_from ?? input.area_to) {
+        query.area = {};
+      }
+      if (input.area_from) {
+        // @ts-expect-error all ok
+        query.area.gte = input.area_from;
+      }
+      if (input.area_to) {
+        // @ts-expect-error all ok
+        query.area.lte = input.area_to;
       }
       const results = await prisma.estate.findMany({
         where: query,
