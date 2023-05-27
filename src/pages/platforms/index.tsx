@@ -1,21 +1,36 @@
-import { type EstateType, type Metro } from "@prisma/client";
-import { type NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 import PlatformListing from "@/components/PlatformListing";
-import { type EstateWithMetro } from "@/components/PlatformListingCard";
+import PlatformListingFilter, {
+  type PlatformListingFilterOptions,
+} from "@/components/PlatformListingFilter";
 import MainLayout from "@/layouts/MainLayout";
-import { prisma } from "@/server/db";
+import { apiNext } from "@/utils/api";
 
-const PlatformsPage = ({
-  estates,
-  estateTypes,
-  metroStations,
-}: {
-  estates: EstateWithMetro[];
-  estateTypes: EstateType[];
-  metroStations: Metro[];
-}) => {
+const PlatformsPage = () => {
+  const router = useRouter();
+  const [filters, setFilters] = useState<PlatformListingFilterOptions>({});
+  const platforms = apiNext.platforms.getFilteredList.useQuery({
+    ...filters,
+  });
+  const platformTypes = apiNext.platforms.getPlatformTypes.useQuery();
+  const metroStations = apiNext.platforms.getMetro.useQuery();
+
+  const handleFilters = (f: PlatformListingFilterOptions) => {
+    const options = { ...f };
+    console.log(options);
+    for (const key of Object.keys(options)) {
+      // @ts-expect-error all ok
+      if (options[key] === undefined || options[key] == null) {
+        // @ts-expect-error all ok
+        // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-dynamic-delete
+        delete options[key];
+      }
+    }
+    setFilters(options);
+  };
   return (
     <>
       <Head>
@@ -32,38 +47,29 @@ const PlatformsPage = ({
             Каталог площадок
           </h1>
           <section className="grid grid-cols-4 gap-x-8">
-            {/* <PropertyFilter
-              estateTypes={data.estateTypes}
-              stations={data.metroStations}
-            /> */}
-            <PlatformListing items={estates} />
-            <div className="col-span-1" />
-            <div className="col-span-3 flex flex-wrap justify-center">
-              {/* <Paginator className='my-4' first={first} rows={rows} totalRecords={120}></Paginator> */}
-            </div>
+            {platformTypes.data && metroStations.data && (
+              <div>
+                <PlatformListingFilter
+                  platformTypes={platformTypes.data}
+                  metroStations={metroStations.data}
+                  handleFilters={handleFilters}
+                />
+              </div>
+            )}
+            {platforms.data && (
+              <>
+                <PlatformListing items={platforms.data} />
+                <div className="col-span-1" />
+                <div className="col-span-3 flex flex-wrap justify-center">
+                  {/* <Paginator className='my-4' first={first} rows={rows} totalRecords={120}></Paginator> */}
+                </div>
+              </>
+            )}
           </section>
         </main>
       </MainLayout>
     </>
   );
 };
-
-export async function getStaticProps() {
-  const estates = await prisma.estate.findMany({
-    include: {
-      metro: true,
-    },
-  });
-  const metroStations = await prisma.metro.findMany();
-  const estateTypes = await prisma.estateType.findMany();
-  return {
-    props: {
-      estates: estates as EstateWithMetro[],
-      estateTypes,
-      metroStations,
-    },
-    revalidate: 10,
-  };
-}
 
 export default PlatformsPage;

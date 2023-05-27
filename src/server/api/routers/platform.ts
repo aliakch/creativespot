@@ -10,6 +10,11 @@ import {
 import { prisma } from "@/server/db";
 import { generateCode } from "@/utils/string-helper";
 
+interface FilterQueryOptions {
+  estate_type?: { id: string };
+  metro?: { id: string };
+}
+
 export const platformRouter = createTRPCRouter({
   add: protectedProcedure
     .input(
@@ -98,6 +103,52 @@ export const platformRouter = createTRPCRouter({
     });
     return additionalPlatforms;
   }),
+  getFilteredList: protectedProcedure
+    .input(
+      z.object({
+        platform_type: z
+          .object({
+            code: z.string(),
+            id: z.string(),
+            name: z.string(),
+          })
+          .optional(),
+        metro: z
+          .object({
+            code: z.string(),
+            id: z.string(),
+            name: z.string(),
+          })
+          .optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      const query: FilterQueryOptions = {};
+      if (input.platform_type) {
+        const platformTypes = await prisma.estateType.findMany();
+        query.estate_type = {
+          // @ts-expect-error all ok
+          id: platformTypes.find((el) => el.code === input.platform_type.code)
+            .id as unknown as string,
+        };
+      }
+      if (input.metro) {
+        const metroStations = await prisma.metro.findMany();
+        query.metro = {
+          // @ts-expect-error all ok
+          id: metroStations.find((el) => el.code === input.metro.code)
+            .id as unknown as string,
+        };
+      }
+      const results = await prisma.estate.findMany({
+        where: query,
+        include: {
+          metro: true,
+        },
+        take: 24,
+      });
+      return results;
+    }),
   getPlatformTypes: protectedProcedure.query(async () => {
     return await prisma.estateType.findMany();
   }),
