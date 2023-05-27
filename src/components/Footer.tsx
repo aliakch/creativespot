@@ -11,7 +11,7 @@ export default function Footer() {
   const { status } = useSession();
 
   return (
-    <footer className="my-14">
+    <footer className="my-14 w-full self-end">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2">
           <div className="flex flex-wrap items-center">

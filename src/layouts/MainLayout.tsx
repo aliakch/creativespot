@@ -20,7 +20,7 @@ export default function MainLayout({
   return (
     <>
       <Header />
-      {children}
+      <div className="flex-1">{children}</div>
       <Footer />
     </>
   );

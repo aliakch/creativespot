@@ -15,7 +15,7 @@ export default function AccountLayout({
   return (
     <>
       <Header />
-      <div className="container grid grid-cols-4 gap-x-8">
+      <div className="container grid flex-1 grid-cols-1 gap-x-8 lg:grid-cols-4">
         <section className="col-span-1">
           <AccountNavigation role={role} selectedOption={selectedOption} />
         </section>

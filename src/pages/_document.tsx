@@ -8,7 +8,7 @@ export default class MyDocument extends Document {
         <Head>
           <link rel="stylesheet" href="/fonts/CeraPro/stylesheet.css" />
         </Head>
-        <body className="bg-cs-dark-900">
+        <body className="flex min-h-screen flex-col bg-cs-dark-900">
           <Main />
           <NextScript />
         </body>
