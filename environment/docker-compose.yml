@@ -1,0 +1,83 @@
+version: "3"
+
+services:
+  web:
+    container_name: ${COMPOSE_PROJECT_NAME}_web
+    build: ./nginx
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "./nginx/conf/nginx.conf"
+        target: "/etc/nginx/nginx.conf"
+      - "./nginx/conf/conf.d:/etc/nginx/conf.d"
+      - "./nginx/conf/sites:/etc/nginx/sites"
+      - "./nginx/conf/certs:/var/lib/letsencrypt"
+      - "./nginx/conf/snippets:/etc/nginx/snippets"
+    networks:
+      default:
+        ipv4_address: 172.30.0.2
+  next:
+    container_name: ${COMPOSE_PROJECT_NAME}_next
+    image: node:18-alpine
+    working_dir: "/opt/app"
+    command: "npm run start"
+    restart: unless-stopped
+    environment:
+      PORT: "80"
+    volumes:
+      - ./..:/opt/app
+    networks:
+      default:
+        ipv4_address: 172.30.0.3
+  postgres:
+    container_name: ${COMPOSE_PROJECT_NAME}_postgres
+    image: postgres:${POSTGRES_VERSION:-latest}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+      - "postgres:/data/postgres"
+    networks:
+      default:
+        ipv4_address: 172.30.0.4
+    restart: unless-stopped
+  s3:
+    container_name: ${COMPOSE_PROJECT_NAME}_S3
+    image: minio/minio:latest
+    command: "server /data --console-address :9001"
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER:-admin}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-adminpassword}"
+    volumes:
+      - "./s3:/data"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      default:
+        ipv4_address: 172.30.0.5
+    restart: unless-stopped
+  dragonfly:
+    container_name: ${COMPOSE_PROJECT_NAME}_dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    command: "dragonfly --logtostderr --cache_mode=true --hz=10000 --save_schedule='*:10'"
+    networks:
+      default:
+        ipv4_address: 172.30.0.6
+    volumes:
+      - "./dragonfly:/data"
+    restart: unless-stopped
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+
+volumes:
+  postgres:
+  pgadmin:
