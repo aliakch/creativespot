@@ -36,6 +36,7 @@ export const platformRouter = createTRPCRouter({
         address: z.string(),
         photo_cover: z.string(),
         photo_gallery: z.string().array(),
+        presentation: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -65,6 +66,7 @@ export const platformRouter = createTRPCRouter({
             address: input.address,
             photo_cover: input.photo_cover,
             photo_gallery: input.photo_gallery,
+            presentation: input.presentation,
             user: {
               connect: { id: user.id },
             },

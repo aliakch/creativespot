@@ -55,6 +55,7 @@ export default function MyPlatformsAddPage() {
       address: "",
       photo_cover: null,
       photo_gallery: [],
+      presentation: null,
     },
   });
 
@@ -92,6 +93,18 @@ export default function MyPlatformsAddPage() {
     return { body: file, meta: { fileUrl }, url: uploadUrl, method: "PUT" };
   };
 
+  const getFileUploadParams = async ({
+    file,
+    meta: { name },
+  }: {
+    file: File;
+    meta: { name: string };
+  }) => {
+    const uploadUrl = await apiClient.s3.getPreSignedUploadUrl.query({ name });
+    const fileUrl = uploadUrl.split("?")[0] as unknown as string;
+    setValue("presentation", fileUrl, { shouldValidate: true });
+    return { body: file, meta: { fileUrl }, url: uploadUrl, method: "PUT" };
+  };
   interface FormInput {
     name: string;
     description: string;
@@ -304,6 +317,18 @@ export default function MyPlatformsAddPage() {
                       onChangeStatus={handleChangeStatus}
                       maxFiles={10}
                       accept="image/*,audio/*,video/*"
+                    />
+                  </div>
+                  {getFormErrorMessage("photo_gallery")}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="photo_gallery">Файл с презентацией</label>
+                  <div className="mb-4 rounded-lg border-2 border-dashed border-cs-primary">
+                    <Dropzone
+                      inputContent="Перетащите сюда файлы или кликните, чтобы выбрать"
+                      getUploadParams={getFileUploadParams}
+                      onChangeStatus={handleChangeStatus}
+                      multiple={false}
                     />
                   </div>
                   {getFormErrorMessage("photo_gallery")}

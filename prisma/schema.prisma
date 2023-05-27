@@ -91,6 +91,8 @@ model Estate {
   metro         Metro?     @relation(fields: [metroId], references: [id])
   userId        String
   metroId       String?
+  presentation  String?
+  active        Boolean?
 }
 
 model EstateType {

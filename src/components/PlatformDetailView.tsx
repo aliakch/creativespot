@@ -162,19 +162,21 @@ export default function PlatformDetailView({
             </DataTable>
           </div>
 
-          <div className="px-8">
-            <div className="rounded-3xl border-2 border-cs-primary py-6">
-              <Link
-                className="flex flex-wrap items-center justify-center"
-                href="/"
-              >
-                <Image className="h-16 w-auto" src={PdfIcon} alt="" />
-                <h4 className="ml-4 text-lg font-semibold text-white hover:text-cs-primary">
-                  Скачать презентацию
-                </h4>
-              </Link>
+          {item.presentation && (
+            <div className="px-8">
+              <div className="rounded-3xl border-2 border-cs-primary py-6">
+                <Link
+                  className="flex flex-wrap items-center justify-center"
+                  href={item.presentation}
+                >
+                  <Image className="h-16 w-auto" src={PdfIcon} alt="" />
+                  <h4 className="ml-4 text-lg font-semibold text-white hover:text-cs-primary">
+                    Скачать презентацию
+                  </h4>
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>
