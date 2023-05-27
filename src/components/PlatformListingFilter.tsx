@@ -57,6 +57,7 @@ const PlatformListingFilter = ({
             optionLabel="name"
             value={filters.platform_type}
             placeholder="Выберите тип площадки"
+            showClear
             onChange={(e) => {
               handleInputChange("platform_type", e);
             }}

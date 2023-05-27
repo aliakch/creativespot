@@ -8,7 +8,7 @@ export default function PropertyListing({
   items: EstateWithMetro[];
 }) {
   return (
-    <div className="col-span-3 grid gap-x-6 gap-y-8 xl:grid-cols-2">
+    <div className="col-span-1 grid gap-x-6 gap-y-8 lg:col-span-3 lg:grid-cols-2 ">
       {items.map((item) => (
         <PlatformListingCard item={item} key={item.id} />
       ))}
