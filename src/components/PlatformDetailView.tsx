@@ -72,21 +72,23 @@ export default function PlatformDetailView({
   return (
     <section>
       <div className="max-h-[600px]">
-        <Splide aria-label="Photo Gallery">
-          {photoGallery?.map((photo, index) => (
-            <SplideSlide key={index}>
-              <div className="flex justify-center">
-                <Image
-                  className="h-[300px] w-auto lg:h-[600px]"
-                  src={photo}
-                  alt=""
-                  height={600}
-                  width={900}
-                />
-              </div>
-            </SplideSlide>
-          ))}
-        </Splide>
+        {photoGallery && (
+          <Splide aria-label="Photo Gallery">
+            {photoGallery.map((photo, index) => (
+              <SplideSlide key={index}>
+                <div className="flex justify-center">
+                  <Image
+                    className="h-[300px] w-auto lg:h-[600px]"
+                    src={photo}
+                    alt=""
+                    height={600}
+                    width={900}
+                  />
+                </div>
+              </SplideSlide>
+            ))}
+          </Splide>
+        )}
       </div>
 
       {/* basic data */}
