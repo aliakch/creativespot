@@ -29,7 +29,7 @@ export default function Footer() {
           <div className="ml-auto hidden flex-wrap items-center lg:flex">
             <div className="items-center justify-center">
               <div className="flex flex-wrap gap-8 xl:gap-16">
-                <HeaderFooterMenuLink href="/about" text="О нас" />
+                <HeaderFooterMenuLink href="/" text="О нас" />
                 <HeaderFooterMenuLink
                   href="/#how-it-works"
                   text="Как это работает"

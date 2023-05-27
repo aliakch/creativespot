@@ -62,7 +62,7 @@ export default function Header() {
               <Link className="block" href="/user/favorites">
                 <Image src={LikeDark} alt="" height={40} width={40} />
               </Link>
-              <Link className="block" href="messages">
+              <Link className="block" href="/messages">
                 <div className="flex h-10 w-10 items-center justify-center">
                   <Image src={HeaderChatIcon} alt="" height={22} width={22} />
                 </div>
@@ -124,7 +124,7 @@ export default function Header() {
           <Link className="block" href="/user/favorites">
             <Image src={LikeDark} alt="" height={40} width={40} />
           </Link>
-          <Link className="block" href="messages">
+          <Link className="block" href="/messages">
             <div className="flex h-10 w-10 items-center justify-center">
               <Image src={HeaderChatIcon} alt="" height={22} width={22} />
             </div>
