@@ -1,7 +1,9 @@
 import { createClient } from "redis";
 
+import { env } from "@/env.mjs";
+
 const client = createClient({
-  url: "redis://192.168.1.118:6379",
+  url: env.REDIS_URL,
 });
 
 void client.connect();

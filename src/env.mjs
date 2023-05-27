@@ -25,6 +25,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MINIO_USE_SSL: z.enum(["true", "false"]),
     NEXT_PUBLIC_MINIO_ACCESS_KEY: z.string(),
     NEXT_PUBLIC_MINIO_SECRET_KEY: z.string(),
+    REDIS_URL: z.string(),
   },
 
   /**
@@ -50,5 +51,6 @@ export const env = createEnv({
     NEXT_PUBLIC_MINIO_USE_SSL: process.env.NEXT_PUBLIC_MINIO_USE_SSL,
     NEXT_PUBLIC_MINIO_ACCESS_KEY: process.env.NEXT_PUBLIC_MINIO_ACCESS_KEY,
     NEXT_PUBLIC_MINIO_SECRET_KEY: process.env.NEXT_PUBLIC_MINIO_SECRET_KEY,
+    REDIS_URL: process.env.REDIS_URL,
   },
 });
