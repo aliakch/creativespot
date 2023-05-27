@@ -9,7 +9,7 @@ import ScrollToBottom from "react-scroll-to-bottom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { connect } from "socket.io-client";
 
-import { useMe } from "@/hooks/useMe";
+import userState from "@/store/user";
 import { apiClient } from "@/utils/api";
 import { generateChatId } from "@/utils/string-helper";
 
@@ -61,7 +61,7 @@ connection.on("connect", () => {
 });
 
 const ChatMessaging = ({ to }: ChatMessagingProps) => {
-  const me = useMe();
+  const me = useRecoilValue(userState);
   const router = useRouter();
   const [msg, setMsg] = useState("");
   const [user, setUser] = useState<User | undefined>(to);
@@ -189,7 +189,7 @@ type ChatListItem = Chat & {
 };
 const ChatView = () => {
   const router = useRouter();
-  const me = useMe();
+  const me = useRecoilValue(userState);
   const [chats, setChats] = useState<ChatListItem[] | false>(false);
   const [chatsLoaded, setChatsLoaded] = useState(false);
   const [chatsPopulated, setChatsPopulated] = useState(false);

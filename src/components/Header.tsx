@@ -5,20 +5,21 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Sidebar } from "primereact/sidebar";
 import React, { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 import CsButton from "@/components/CsButton";
 import HeaderFooterMenuLink from "@/components/HeaderFooterMenuLink";
-import { useMe } from "@/hooks/useMe";
 import HeaderChatIcon from "@/images/HeaderChatIcon.svg";
 import LikeDark from "@/images/LikeDark.svg";
 import Logo from "@/images/Logo.svg";
+import userState from "@/store/user";
 import { getPrettyUserName } from "@/utils/platform-helper";
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { status } = useSession();
 
-  const me = useMe();
+  const me = useRecoilValue(userState);
 
   const [userFullName, setUserFullName] = useState("");
 

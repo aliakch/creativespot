@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
-import { useMe } from "@/hooks/useMe";
 import Like from "@/images/Like.svg";
 import MetroIcon from "@/images/MetroIcon.svg";
+import userState from "@/store/user";
 import { apiClient } from "@/utils/api";
 import { getPrettyPrice } from "@/utils/platform-helper";
 
@@ -25,7 +26,7 @@ export default function PropertyListingCard({
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
   const [isFavorite, setFavorite] = useState(false);
   const { status } = useSession();
-  const me = useMe();
+  const me = useRecoilValue(userState);
 
   useEffect(() => {
     if (me) {

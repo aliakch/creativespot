@@ -15,11 +15,8 @@ import { generateChatId } from "@/utils/string-helper";
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
     const email = ctx.session.user.email;
-    if (email == null) {
-      throw new TRPCError({
-        message: "Не задан адрес e-mail",
-        code: "PARSE_ERROR",
-      });
+    if (email == null || email === undefined) {
+      return false;
     }
     const user = await prisma.user.findUnique({
       where: {

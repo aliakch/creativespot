@@ -46,7 +46,7 @@ const PlatformsPage = () => {
           <h1 className="mb-10 text-3xl font-bold text-white">
             Каталог площадок
           </h1>
-          <section className="grid grid-cols-4 gap-x-8">
+          <section className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-4">
             {platformTypes.data && metroStations.data && (
               <div>
                 <PlatformListingFilter
@@ -59,11 +59,16 @@ const PlatformsPage = () => {
             {platforms.data && (
               <>
                 <PlatformListing items={platforms.data} />
-                <div className="col-span-1" />
-                <div className="col-span-3 flex flex-wrap justify-center">
+                <div className="col-span-1 hidden lg:block" />
+                <div className="flex flex-wrap justify-center lg:col-span-3">
                   {/* <Paginator className='my-4' first={first} rows={rows} totalRecords={120}></Paginator> */}
                 </div>
               </>
+            )}
+            {!platforms.data && (
+              <h4 className="text-2xl font-semibold">
+                К сожалению, по вашему запросу площадок не найдено
+              </h4>
             )}
           </section>
         </main>

@@ -22,7 +22,6 @@ const PlatformDetailPage = () => {
   useEffect(() => {
     const getByCode = async () => {
       const s = router.query.slug;
-      console.log(s);
       if (s) {
         const p = await apiClient.platforms.getByCode.query({
           code: s as unknown as string,
