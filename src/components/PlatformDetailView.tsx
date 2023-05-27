@@ -5,6 +5,8 @@ import {
   type Metro,
   type User,
 } from "@prisma/client";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
+import "@splidejs/react-splide/css";
 import Image from "next/image";
 import Link from "next/link";
 import { Column } from "primereact/column";
@@ -58,6 +60,10 @@ export default function PlatformDetailView({
     ? item.description.split("\n").map((str, index) => <p key={index}>{str}</p>)
     : "";
 
+  const photoGallery = item.photo_gallery
+    ? (item.photo_gallery as string[])
+    : null;
+
   const prettyUserName =
     item.user.first_name +
     " " +
@@ -65,19 +71,26 @@ export default function PlatformDetailView({
     ".";
   return (
     <section>
-      {/* <BreadCrumb className="mb-4" model={breadcrumbItems} home={home} /> */}
-      <div className="flex justify-center bg-gray-900">
-        <Image
-          src="https://static.my.ge/myhome/photos/7/7/2/3/2/large/13823277_6.jpg?v=11"
-          alt=""
-          width={1200}
-          height={900}
-          className="h-full w-auto"
-        />
+      <div className="max-h-[600px]">
+        <Splide aria-label="Photo Gallery">
+          {photoGallery?.map((photo, index) => (
+            <SplideSlide key={index}>
+              <div className="flex justify-center">
+                <Image
+                  className="h-[300px] w-auto lg:h-[600px]"
+                  src={photo}
+                  alt=""
+                  height={600}
+                  width={900}
+                />
+              </div>
+            </SplideSlide>
+          ))}
+        </Splide>
       </div>
 
       {/* basic data */}
-      <div className="my-8 grid grid-cols-3">
+      <div className="my-8 grid grid-cols-1 lg:grid-cols-3">
         <div className="col-span-2">
           <div className="mb-3 flex flex-wrap">
             <h2 className="text-2xl font-semibold text-white">{item.name}</h2>
@@ -86,7 +99,7 @@ export default function PlatformDetailView({
             </p>
           </div>
           <p className="mb-2 text-xl text-white">{item.address}</p>
-          <div className="flex flex-wrap items-center">
+          <div className="mb-4 flex flex-wrap items-center">
             <Image src={MetroIcon} alt="" className="mr-2 block h-4 w-auto" />
             <p className="text-xl font-medium text-white">{item.metro?.name}</p>
           </div>
@@ -95,8 +108,14 @@ export default function PlatformDetailView({
           <div className="grid grid-cols-12">
             <div className="col-span-5">
               <h4 className="text-3xl font-bold text-white">{price} Ꝑ</h4>
-              <p className="mb-2 text-sm text-cs-dark-300">Телефон:</p>
-              <p className="font-medium text-cs-dark-300">+ 7 965 456 ** **</p>
+              {item.user.phone && (
+                <>
+                  <p className="mb-2 text-sm text-cs-dark-300">Телефон:</p>
+                  <p className="font-medium text-cs-dark-300">
+                    {item.user.phone}
+                  </p>
+                </>
+              )}
             </div>
             <div className="col-span-7">
               <div className="flex flex-wrap">
@@ -121,16 +140,17 @@ export default function PlatformDetailView({
           </div>
         </div>
       </div>
+
       {/* description, specifications */}
-      <div className="grid grid-cols-8 gap-x-16">
-        <div className="col-span-5">
+      <div className="grid grid-cols-1 gap-x-16 lg:grid-cols-8">
+        <div className="lg:col-span-5">
           <h5 className="mb-2 text-2xl font-semibold text-white">Описание</h5>
           <div className="flex flex-col flex-wrap gap-2 text-lg text-white">
             {description}
           </div>
         </div>
-        <div className="col-span-3">
-          <div className="px-8 py-6">
+        <div className="lg:col-span-3">
+          <div className="my-4 lg:my-0 lg:px-8 lg:py-6">
             <h5 className="mb-2 text-2xl font-semibold text-white">
               Характеристики
             </h5>
