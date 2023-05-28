@@ -36,9 +36,9 @@ export const platformRouter = createTRPCRouter({
         area: z.number(),
         metro: z.string(),
         address: z.string(),
-        photo_cover: z.string(),
-        photo_gallery: z.string().array(),
-        presentation: z.string().optional(),
+        photo_cover: z.string().optional().nullable(),
+        photo_gallery: z.string().array().optional().nullable(),
+        presentation: z.string().optional().nullable(),
         active: z.boolean().optional(),
       })
     )

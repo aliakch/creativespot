@@ -57,6 +57,7 @@ export default function MyPlatformsAddPage() {
       photo_cover: null,
       photo_gallery: [],
       presentation: null,
+      action: "add",
     },
   });
 
@@ -78,6 +79,7 @@ export default function MyPlatformsAddPage() {
           setValue("photo_cover", data.photo_cover);
           setValue("photo_gallery", data.photo_gallery);
           setValue("presentation", data.presentation);
+          setValue("action", "edit");
         }
       }
     };
