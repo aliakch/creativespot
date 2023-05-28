@@ -19,6 +19,7 @@ export default function MyPlatformsAddPage() {
   const [metro, setMetro] = useState<Metro[]>([]);
   const [metroNames, setMetroNames] = useState<string[]>([]);
   const [platformTypes, setPlatformTypes] = useState<EstateType[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getMetroNames = async () => {
@@ -58,6 +59,30 @@ export default function MyPlatformsAddPage() {
       presentation: null,
     },
   });
+
+  useEffect(() => {
+    const getSavedState = async () => {
+      if (router.query.edit) {
+        console.log(router.query.edit);
+        const data = await apiClient.platforms.getById.query({
+          id: router.query.edit as string,
+        });
+        if (data) {
+          setValue("name", data.name);
+          setValue("platform_type", data.estate_type);
+          setValue("description", data.description);
+          setValue("price", data.price);
+          setValue("area", data.area);
+          setValue("metro", data.metro?.name);
+          setValue("address", data.address);
+          setValue("photo_cover", data.photo_cover);
+          setValue("photo_gallery", data.photo_gallery);
+          setValue("presentation", data.presentation);
+        }
+      }
+    };
+    void getSavedState();
+  }, [router.query.edit]);
 
   const handleChangeStatus = ({ meta }, status) => {
     console.log(status, meta);

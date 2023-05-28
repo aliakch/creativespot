@@ -20,8 +20,10 @@ export type EstateWithMetro = Estate & {
 
 export default function PropertyListingCard({
   item,
+  edit = false,
 }: {
   item: EstateWithMetro;
+  edit?: boolean;
 }) {
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
   const [isFavorite, setFavorite] = useState(false);
@@ -80,6 +82,13 @@ export default function PropertyListingCard({
         >
           <h4 className="text-white">{item.name}</h4>
         </Link>
+        {status === "authenticated" && edit && (
+          <p>
+            <Link href={`/user/my-platforms/add/?edit=${item.id}`}>
+              Редактировать
+            </Link>
+          </p>
+        )}
         <div className="flex flex-wrap items-center">
           {item.price && (
             <p className="mr-4 text-lg font-semibold text-white">{price} Ꝑ</p>

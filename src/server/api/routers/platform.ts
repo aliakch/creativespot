@@ -23,6 +23,8 @@ export const platformRouter = createTRPCRouter({
   add: protectedProcedure
     .input(
       z.object({
+        action: z.string(),
+        id: z.string().optional(),
         name: z.string().min(3),
         platform_type: z.object({
           code: z.string(),
@@ -56,29 +58,55 @@ export const platformRouter = createTRPCRouter({
         },
       })) as unknown as Metro;
       if (user) {
-        const platform = await prisma.estate.create({
-          data: {
-            name: input.name,
-            area: input.area,
-            code: generateCode(input.name),
-            description: input.description,
-            price: input.price,
-            address: input.address,
-            photo_cover: input.photo_cover,
-            photo_gallery: input.photo_gallery,
-            presentation: input.presentation,
-            user: {
-              connect: { id: user.id },
+        if (input.action === "add") {
+          const platform = await prisma.estate.create({
+            data: {
+              name: input.name,
+              area: input.area,
+              code: generateCode(input.name),
+              description: input.description,
+              price: input.price,
+              address: input.address,
+              photo_cover: input.photo_cover,
+              photo_gallery: input.photo_gallery,
+              presentation: input.presentation,
+              user: {
+                connect: { id: user.id },
+              },
+              estate_type: {
+                connect: { id: input.platform_type.id },
+              },
+              metro: {
+                connect: { id: metroStation.id },
+              },
             },
-            estate_type: {
-              connect: { id: input.platform_type.id },
+          });
+          return platform;
+        }
+        if (input.action === "edit" && input.id) {
+          const platform = await prisma.estate.update({
+            where: {
+              id: input.id,
             },
-            metro: {
-              connect: { id: metroStation.id },
+            data: {
+              name: input.name,
+              area: input.area,
+              description: input.description,
+              price: input.price,
+              address: input.address,
+              photo_cover: input.photo_cover,
+              photo_gallery: input.photo_gallery,
+              presentation: input.presentation,
+              estate_type: {
+                connect: { id: input.platform_type.id },
+              },
+              metro: {
+                connect: { id: metroStation.id },
+              },
             },
-          },
-        });
-        return platform;
+          });
+          return platform;
+        }
       }
     }),
   getByCode: protectedProcedure
@@ -91,6 +119,25 @@ export const platformRouter = createTRPCRouter({
       const platform = await prisma.estate.findFirst({
         where: {
           code: input.code,
+        },
+        include: {
+          estate_type: true,
+          metro: true,
+          user: true,
+        },
+      });
+      return platform;
+    }),
+  getById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const platform = await prisma.estate.findFirst({
+        where: {
+          id: input.id,
         },
         include: {
           estate_type: true,

@@ -54,7 +54,7 @@ export default function MyPlatformsPage() {
               </div>
               <div className="grid grid-cols-2 gap-6">
                 {platforms.map((item) => (
-                  <PlatformListingCard key={item.id} item={item} />
+                  <PlatformListingCard edit key={item.id} item={item} />
                 ))}
               </div>
             </>
