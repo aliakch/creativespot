@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Router, useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { Checkbox } from "primereact/checkbox";
 import { useEffect, useState } from "react";
@@ -57,18 +58,25 @@ export default function PropertyListingCard({
       setActive(!active);
     }
   };
+
+  const deleteItem = async () => {
+    const response = await apiClient.platforms.delete.query({
+      id: item.id,
+    });
+    if (response) {
+      location.reload();
+    }
+  };
   return (
     <div className="flex flex-wrap">
-      <div className="relative">
-        {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
-        <Link className="photo block" href={`/platforms/${item.code}`}>
+      <div className="relative h-[250px] w-full">
+        <Link className="block w-full" href={`/platforms/${item.code}`}>
           {item.photo_cover && (
             <Image
               src={item.photo_cover}
               alt={item.name}
-              width={400}
-              height={300}
-              className="w-full rounded-t-xl"
+              fill
+              className="w-full rounded-t-xl object-cover"
             />
           )}
         </Link>
@@ -87,19 +95,30 @@ export default function PropertyListingCard({
       </div>
 
       <div className="w-full rounded-b-xl border-t-0 border-cs-dark-500 bg-cs-dark-800 p-3 pb-5">
-        <Link
-          className="mb-2 inline-block text-sm font-medium"
-          href={`/platforms/${item.code}`}
-        >
-          <h4 className="text-white">{item.name}</h4>
-        </Link>
-        {status === "authenticated" && edit && (
-          <p>
-            <Link href={`/user/my-platforms/add/?edit=${item.id}`}>
-              Редактировать
-            </Link>
-          </p>
-        )}
+        <div className="flex flex-wrap">
+          <Link
+            className="mb-2 inline-block text-sm font-medium"
+            href={`/platforms/${item.code}`}
+          >
+            <h4 className="text-white">{item.name}</h4>
+          </Link>
+          {status === "authenticated" && edit && (
+            <>
+              <p className="ml-auto text-sm font-medium">
+                <Link href={`/user/my-platforms/add/?edit=${item.id}`}>
+                  Редактировать
+                </Link>
+              </p>
+              <p
+                className="ml-2 cursor-pointer text-sm font-medium"
+                onClick={() => void deleteItem()}
+              >
+                Удалить
+              </p>
+            </>
+          )}
+        </div>
+
         {status === "authenticated" &&
           edit &&
           me &&

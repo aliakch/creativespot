@@ -111,6 +111,49 @@ export const platformRouter = createTRPCRouter({
         }
       }
     }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const email = ctx.session.user.email;
+      if (email) {
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+          include: {
+            user_role: true,
+            Estate: {
+              select: { id: true },
+            },
+          },
+        });
+        if (user) {
+          if (user.user_role.name === "admin") {
+            await prisma.estate.delete({
+              where: {
+                id: input.id,
+              },
+            });
+            return true;
+          } else if (user.user_role.name === "owner") {
+            const estateIds = user.Estate.map((item) => item.id);
+            if (estateIds.includes(input.id)) {
+              await prisma.estate.delete({
+                where: {
+                  id: input.id,
+                },
+              });
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }),
   getByCode: protectedProcedure
     .input(
       z.object({
