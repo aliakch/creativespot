@@ -39,6 +39,7 @@ export const platformRouter = createTRPCRouter({
         photo_cover: z.string(),
         photo_gallery: z.string().array(),
         presentation: z.string().optional(),
+        active: z.boolean().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -70,6 +71,7 @@ export const platformRouter = createTRPCRouter({
               photo_cover: input.photo_cover,
               photo_gallery: input.photo_gallery,
               presentation: input.presentation,
+              active: true,
               user: {
                 connect: { id: user.id },
               },
@@ -298,4 +300,23 @@ export const platformRouter = createTRPCRouter({
     });
     return { status: "ok", items: favorites };
   }),
+  toggleActive: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const results = await prisma.estate.findUnique({
+        where: { id: input.id },
+      });
+      if (results) {
+        await prisma.estate.update({
+          where: { id: input.id },
+          data: { active: !results.active },
+        });
+        return true;
+      }
+      return false;
+    }),
 });

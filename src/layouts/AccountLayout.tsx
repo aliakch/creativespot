@@ -1,6 +1,11 @@
+import { useEffect } from "react";
+import { useSetRecoilState } from "recoil";
+
 import AccountNavigation from "@/components/account/AccountNavigation";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { useMe } from "@/hooks/useMe";
+import userState from "@/store/user";
 import { type Role } from "@/types/user";
 
 export default function AccountLayout({
@@ -12,6 +17,11 @@ export default function AccountLayout({
   role: Role;
   selectedOption: string;
 }) {
+  const me = useMe();
+  const setUser = useSetRecoilState(userState);
+  useEffect(() => {
+    setUser(me);
+  }, [me]);
   return (
     <>
       <Header />

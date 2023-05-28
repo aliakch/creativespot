@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSetRecoilState } from "recoil";
 
 import CsButton from "@/components/CsButton";
 import PlatformListingCard, {
@@ -6,12 +7,19 @@ import PlatformListingCard, {
 } from "@/components/PlatformListingCard";
 import { useMe } from "@/hooks/useMe";
 import AccountLayout from "@/layouts/AccountLayout";
+import userState from "@/store/user";
 import { apiClient } from "@/utils/api";
 
 export default function MyPlatformsPage() {
   const [platforms, setPlatforms] = useState<EstateWithMetro[] | false>(false);
 
   const me = useMe();
+  const setUser = useSetRecoilState(userState);
+  useEffect(() => {
+    if (me) {
+      setUser(me);
+    }
+  }, [me]);
 
   useEffect(() => {
     const fetchData = async () => {

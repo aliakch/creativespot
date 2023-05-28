@@ -57,6 +57,13 @@ const getActiveLinksData = (selectedOption: string, role: Role) => {
       roles: ["owner"],
     },
     {
+      code: "my-platforms",
+      text: "Доступные площадки",
+      href: "/user/my-platforms",
+      active: false,
+      roles: ["admin"],
+    },
+    {
       code: "reviews",
       text: "Отзывы обо мне",
       href: "/user/reviews",

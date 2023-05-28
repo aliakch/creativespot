@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Checkbox } from "primereact/checkbox";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
@@ -27,6 +28,7 @@ export default function PropertyListingCard({
 }) {
   const price = item.price ? getPrettyPrice(item.price) : "По договоренности";
   const [isFavorite, setFavorite] = useState(false);
+  const [active, setActive] = useState(!!(item.active === null || item.active));
   const { status } = useSession();
   const me = useRecoilValue(userState);
 
@@ -44,6 +46,15 @@ export default function PropertyListingCard({
     });
     if (response.status === "ok") {
       setFavorite(!isFavorite);
+    }
+  };
+
+  const toggleActive = async () => {
+    const response = await apiClient.platforms.toggleActive.query({
+      id: item.id,
+    });
+    if (response) {
+      setActive(!active);
     }
   };
   return (
@@ -89,6 +100,23 @@ export default function PropertyListingCard({
             </Link>
           </p>
         )}
+        {status === "authenticated" &&
+          edit &&
+          me &&
+          me.user_role.name === "admin" && (
+            <div className="flex items-center">
+              <Checkbox
+                id={`active_${item.id}`}
+                checked={active}
+                // eslint-disable-next-line no-void
+                onChange={() => void toggleActive()}
+                value={`active_${item.id}`}
+              />
+              <label htmlFor={`active_${item.id}`} className="ml-2">
+                Активность
+              </label>
+            </div>
+          )}
         <div className="flex flex-wrap items-center">
           {item.price && (
             <p className="mr-4 text-lg font-semibold text-white">{price} Ꝑ</p>
