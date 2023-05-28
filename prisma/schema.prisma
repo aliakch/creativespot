@@ -87,7 +87,7 @@ model Estate {
   photo_cover   String?
   photo_gallery Json?
   estateTypeId  String
-  user          User       @relation(fields: [userId], references: [id])
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   metro         Metro?     @relation(fields: [metroId], references: [id])
   userId        String
   metroId       String?
@@ -107,7 +107,7 @@ model UserReview {
   title  String
   rating Int
   text   String?
-  User   User    @relation(fields: [userId], references: [id])
+  User   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 }
 

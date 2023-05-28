@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import { type UserWithRole } from "@/types/user";
@@ -14,6 +14,8 @@ const useMe = () => {
       (await apiClient.users.me.query()) as unknown as UserWithRole | null;
     if (userData) {
       setMe(userData);
+    } else {
+      void signOut({ redirect: false });
     }
   };
 
