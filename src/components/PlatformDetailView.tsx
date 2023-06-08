@@ -12,6 +12,7 @@ import Link from "next/link";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 
+import { CalendarView } from "@/components/CalendarView";
 import CsAvatar from "@/components/CsAvatar";
 import CsButton from "@/components/CsButton";
 import MetroIcon from "@/images/MetroIcon.svg";
@@ -178,6 +179,15 @@ export default function PlatformDetailView({
             </div>
           )}
         </div>
+      </div>
+
+      <h4 className="mt-8 text-2xl font-semibold text-white">
+        Календарь бронирования
+      </h4>
+      <div className="flex gap-x-16">
+        <CalendarView />
+        <CalendarView />
+        <CalendarView />
       </div>
     </section>
   );
