@@ -186,8 +186,6 @@ export default function PlatformDetailView({
       </h4>
       <div className="flex gap-x-16">
         <CalendarView />
-        <CalendarView />
-        <CalendarView />
       </div>
     </section>
   );
