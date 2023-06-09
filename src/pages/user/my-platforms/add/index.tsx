@@ -1,6 +1,14 @@
-import { type EstateType, type Metro } from "@prisma/client";
+import {
+  type EstateBusyTime,
+  type EstateType,
+  type Metro,
+} from "@prisma/client";
+import { format } from "date-fns";
 import { useRouter } from "next/router";
 import { AutoComplete } from "primereact/autocomplete";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Editor } from "primereact/editor";
 import { InputNumber } from "primereact/inputnumber";
@@ -10,10 +18,38 @@ import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone-uploader";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 
+import { BookingRangeDatepicker } from "@/components/BookingRangeDatepicker";
 import CsButton from "@/components/CsButton";
 import { useMe } from "@/hooks/useMe";
 import AccountLayout from "@/layouts/AccountLayout";
 import { apiClient } from "@/utils/api";
+import { generateRandomInt } from "@/utils/string-helper";
+
+interface FormInput {
+  name: string;
+  description: string;
+  price: number;
+  area: number;
+  address: string;
+  photo_cover: string;
+  photo_gallery: string[];
+  platform_type: {
+    code: string;
+    id: string;
+    name: string;
+  };
+  metro: string;
+  action: "add" | "edit";
+  busy_time?: FormInputBusyTime[];
+}
+
+export interface FormInputBusyTime {
+  id: number | string;
+  date_from: string;
+  date_to: string;
+  type: string; // "booking" | "custom";
+  status: string; // "pending" | "confirmed" | "rejected" | "fullfilled";
+}
 
 export default function MyPlatformsAddPage() {
   const [metro, setMetro] = useState<Metro[]>([]);
@@ -47,6 +83,7 @@ export default function MyPlatformsAddPage() {
   } = useForm({
     mode: "onTouched",
     defaultValues: {
+      id: null,
       name: "",
       platform_type: null,
       description: null,
@@ -58,8 +95,23 @@ export default function MyPlatformsAddPage() {
       photo_gallery: [],
       presentation: null,
       action: "add",
+      busy_time: [],
     },
   });
+
+  const importEstateBusyTime = (time: EstateBusyTime[]) => {
+    const data = time.map((el) => {
+      return {
+        ...el,
+        ...{
+          date_from: format(el.date_from, "yyyy-MM-dd"),
+          date_to: format(el.date_to, "yyyy-MM-dd"),
+        },
+      };
+    });
+    setBusyTimeValues(data);
+    return data;
+  };
 
   useEffect(() => {
     const getSavedState = async () => {
@@ -68,7 +120,9 @@ export default function MyPlatformsAddPage() {
         const data = await apiClient.platforms.getById.query({
           id: router.query.edit as string,
         });
+        console.log(data);
         if (data) {
+          setValue("id", data.id);
           setValue("name", data.name);
           setValue("platform_type", data.estate_type);
           setValue("description", data.description);
@@ -79,6 +133,7 @@ export default function MyPlatformsAddPage() {
           setValue("photo_cover", data.photo_cover);
           setValue("photo_gallery", data.photo_gallery);
           setValue("presentation", data.presentation);
+          setValue("busy_time", importEstateBusyTime(data.EstateBusyTime));
           setValue("action", "edit");
         }
       }
@@ -132,21 +187,6 @@ export default function MyPlatformsAddPage() {
     setValue("presentation", fileUrl, { shouldValidate: true });
     return { body: file, meta: { fileUrl }, url: uploadUrl, method: "PUT" };
   };
-  interface FormInput {
-    name: string;
-    description: string;
-    price: number;
-    area: number;
-    address: string;
-    photo_cover: string;
-    photo_gallery: string[];
-    platform_type: {
-      code: string;
-      id: string;
-      name: string;
-    };
-    metro: string;
-  }
 
   const metroSearch = (e: { query: string }) => {
     if (metro.length > 0) {
@@ -159,9 +199,47 @@ export default function MyPlatformsAddPage() {
     }
   };
 
+  const [busyTimeValues, setBusyTimeValues] = useState(getValues("busy_time"));
+
+  useEffect(() => {
+    setLoading(false);
+  }, [busyTimeValues]);
+
+  const handleAddBusyTime = (dateFrom: Date, dateTo: Date) => {
+    const dates = {
+      id: generateRandomInt(100, 2000), // pseudo id
+      date_from: format(dateFrom, "yyyy-MM-dd"),
+      date_to: format(dateTo, "yyyy-MM-dd"),
+      type: "custom",
+      status: "confirmed",
+    };
+    const v = getValues("busy_time") ?? [];
+    v.push(dates);
+    setValue("busy_time", v);
+    setBusyTimeValues(v);
+  };
+
+  const handleDeleteBusyTime = (id: string | number) => {
+    setBusyTimeValues(busyTimeValues.filter((el) => el.id !== id));
+  };
+
+  const busyTimeDeleteColumnTemplate = (item: FormInputBusyTime) => {
+    return (
+      <Button
+        // eslint-disable-next-line tailwindcss/no-custom-classname
+        icon="pi pi-times"
+        severity="danger"
+        outlined
+        onClick={() => {
+          handleDeleteBusyTime(item.id);
+        }}
+      />
+    );
+  };
+
   const onSubmit: SubmitHandler<FormInput> = async (data) => {
-    const results = await apiClient.platforms.add.query({ ...data });
     console.log(data);
+    const results = await apiClient.platforms.add.query({ ...data });
     if (results) {
       reset();
       await router.push("/user/my-platforms");
@@ -359,6 +437,26 @@ export default function MyPlatformsAddPage() {
                     />
                   </div>
                   {getFormErrorMessage("photo_gallery")}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="booking_dates">
+                    Забронированные или отключенные даты
+                  </label>
+                  <DataTable value={busyTimeValues}>
+                    <Column field="date_from" header="От" />
+                    <Column field="date_to" header="До" />
+                    <Column field="type" header="Тип" />
+                    <Column field="status" header="Статус" />
+                    <Column header="" body={busyTimeDeleteColumnTemplate} />
+                  </DataTable>
+                  {/* {busyTimeValues.map((el, index) => (
+                    <p key={index}>
+                      От {el.date_from} до {el.date_to}
+                    </p>
+                  ))} */}
+                  <BookingRangeDatepicker onSubmit={handleAddBusyTime} />
+
+                  {getFormErrorMessage("booking_dates")}
                 </div>
                 <CsButton type="button" buttonType="submit">
                   Добавить площадку

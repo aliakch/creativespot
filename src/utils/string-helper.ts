@@ -16,4 +16,10 @@ const generateChatId = (str1: string, str2: string) => {
   return str1.localeCompare(str2) ? `${str1}_${str2}` : `${str2}_${str1}`;
 };
 
-export { generateCode, generateChatId };
+const generateRandomInt = (min: number, max: number) => {
+  const newMin = Math.ceil(min);
+  const newMax = Math.floor(max);
+  return Math.floor(Math.random() * (newMax - newMin) + newMin); // The maximum is exclusive and the minimum is inclusive
+};
+
+export { generateCode, generateChatId, generateRandomInt };

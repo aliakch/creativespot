@@ -4,10 +4,10 @@ import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { RecoilRoot } from "recoil";
 
-import { UserProvider } from "@/providers/UserProvider";
 import { apiNext } from "@/utils/api";
 
 import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 import "@/styles/primereact.css";
 import "@/styles/globals.css";
 

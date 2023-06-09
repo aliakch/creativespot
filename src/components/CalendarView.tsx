@@ -90,6 +90,7 @@ export const CalendarView = () => {
       case "12":
         return "Декабрь";
     }
+    return "";
   };
 
   return (

@@ -64,7 +64,8 @@ model User {
   favorites       String[]
   reviews         UserReview[]
   Estate          Estate[]
-  chats           Chat[]
+  chatsFrom       Chat[]       @relation("chatsFrom")
+  chatsTo         Chat[]       @relation("chatsTo")
   created_at      DateTime     @default(now())
   updated_at      DateTime     @default(now())
 }
@@ -76,23 +77,24 @@ model UserRole {
 }
 
 model Estate {
-  id            String     @id @unique @default(cuid())
-  name          String
-  code          String
-  description   String
-  price         Int
-  area          Int
-  address       String
-  estate_type   EstateType @relation(fields: [estateTypeId], references: [id])
-  photo_cover   String?
-  photo_gallery Json?
-  estateTypeId  String
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  metro         Metro?     @relation(fields: [metroId], references: [id])
-  userId        String
-  metroId       String?
-  presentation  String?
-  active        Boolean?
+  id             String           @id @unique @default(cuid())
+  name           String
+  code           String
+  description    String
+  price          Int
+  area           Int
+  address        String
+  estate_type    EstateType       @relation(fields: [estateTypeId], references: [id])
+  photo_cover    String?
+  photo_gallery  Json?
+  estateTypeId   String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metro          Metro?           @relation(fields: [metroId], references: [id])
+  userId         String
+  metroId        String?
+  presentation   String?
+  active         Boolean?
+  EstateBusyTime EstateBusyTime[]
 }
 
 model EstateType {
@@ -100,6 +102,19 @@ model EstateType {
   name   String
   code   String
   estate Estate[]
+}
+
+model EstateBusyTime {
+  id           String    @id @unique @default(cuid())
+  type         String
+  status       String
+  date_from    DateTime?
+  date_to      DateTime?
+  estate       Estate    @relation(fields: [estateId], references: [id])
+  estateId     String
+  document_url String?
+  chat         Chat?     @relation(fields: [chatId], references: [id])
+  chatId       String?    @unique
 }
 
 model UserReview {
@@ -119,8 +134,12 @@ model Metro {
 }
 
 model Chat {
-  id    String @id @unique @default(cuid())
-  users   User[]
+  id             String          @id @unique @default(cuid())
+  userFrom       User            @relation("chatsFrom", fields: [chatFromId], references: [id])
+  userTo         User            @relation("chatsTo", fields: [chatToId], references: [id])
+  chatFromId     String
+  chatToId       String
+  estate_booking EstateBusyTime?
 }
 
 model VerificationToken {

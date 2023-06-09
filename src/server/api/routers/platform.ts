@@ -1,7 +1,9 @@
-import { type Metro } from "@prisma/client";
+import { type EstateBusyTime, type Metro } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { parse } from "date-fns";
 import { z } from "zod";
 
+import { type FormInputBusyTime } from "@/pages/user/my-platforms/add";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { prisma } from "@/server/db";
 import { generateCode } from "@/utils/string-helper";
@@ -40,10 +42,22 @@ export const platformRouter = createTRPCRouter({
         photo_gallery: z.string().array().optional().nullable(),
         presentation: z.string().optional().nullable(),
         active: z.boolean().optional(),
+        busy_time: z
+          .array(
+            z.object({
+              id: z.union([z.number(), z.string()]),
+              date_from: z.string(),
+              date_to: z.string(),
+              type: z.string(),
+              status: z.string(),
+            })
+          )
+          .optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const email = ctx.session.user.email!;
+      const email = ctx.session.user.email;
+      if (!email) return;
       const user = await prisma.user.findUnique({
         where: {
           email,
@@ -58,9 +72,11 @@ export const platformRouter = createTRPCRouter({
           name: input.metro,
         },
       })) as unknown as Metro;
+      let platformId = input.id;
+      let platform = null;
       if (user) {
         if (input.action === "add") {
-          const platform = await prisma.estate.create({
+          platform = await prisma.estate.create({
             data: {
               name: input.name,
               area: input.area,
@@ -83,10 +99,10 @@ export const platformRouter = createTRPCRouter({
               },
             },
           });
-          return platform;
+          platformId = platform.id;
         }
         if (input.action === "edit" && input.id) {
-          const platform = await prisma.estate.update({
+          platform = await prisma.estate.update({
             where: {
               id: input.id,
             },
@@ -107,8 +123,81 @@ export const platformRouter = createTRPCRouter({
               },
             },
           });
-          return platform;
+          platformId = platform.id;
         }
+        const busyTimes = await prisma.estateBusyTime.findMany({
+          where: {
+            estateId: { equals: platformId },
+          },
+        });
+        const handleBusyTimes = async (
+          oldBusyTimes: EstateBusyTime[],
+          newBusyTimes: FormInputBusyTime[] | undefined = []
+        ) => {
+          const oldIds = oldBusyTimes.map((busyTime) => {
+            return busyTime.id;
+          });
+          const newIdsRegistered: string[] = [];
+          const newBusyTimesToAdd: FormInputBusyTime[] = [];
+          newBusyTimes.forEach((item) => {
+            if (typeof item.id === "string") {
+              if (oldIds.includes(item.id)) {
+                newIdsRegistered.push(item.id);
+              }
+            } else if (typeof item.id === "number") {
+              newBusyTimesToAdd.push(item);
+            }
+          });
+
+          const oldItemsRemoved = oldIds.filter(
+            (id) => !newIdsRegistered.includes(id)
+          );
+
+          // create
+          if (newBusyTimesToAdd.length > 0) {
+            const query = newBusyTimesToAdd.map((item) => {
+              return {
+                type: "custom",
+                date_from: parse(item.date_from, "yyyy-MM-dd", new Date()),
+                date_to: parse(item.date_from, "yyyy-MM-dd", new Date()),
+                status: "confirmed",
+                estateId: platformId,
+              };
+            });
+            await prisma.estateBusyTime.createMany({
+              data: query,
+            });
+          }
+          if (newIdsRegistered.length > 0) {
+            for (const newId of newIdsRegistered) {
+              const busyTime = newBusyTimes.filter((el) => el.id === newId);
+              await prisma.estateBusyTime.update({
+                where: {
+                  id: newId,
+                },
+                data: {
+                  date_from: parse(
+                    busyTime[0].date_from,
+                    "yyyy-MM-dd",
+                    new Date()
+                  ),
+                  date_to: parse(busyTime[0].date_to, "yyyy-MM-dd", new Date()),
+                },
+              });
+            }
+          }
+          if (oldBusyTimes.length > 0) {
+            await prisma.estateBusyTime.deleteMany({
+              where: {
+                id: {
+                  in: oldItemsRemoved,
+                },
+              },
+            });
+          }
+        };
+        await handleBusyTimes(busyTimes, input.busy_time);
+        return platform;
       }
     }),
   delete: protectedProcedure
@@ -169,6 +258,7 @@ export const platformRouter = createTRPCRouter({
           estate_type: true,
           metro: true,
           user: true,
+          EstateBusyTime: true,
         },
       });
       return platform;
@@ -188,6 +278,7 @@ export const platformRouter = createTRPCRouter({
           estate_type: true,
           metro: true,
           user: true,
+          EstateBusyTime: true,
         },
       });
       return platform;
