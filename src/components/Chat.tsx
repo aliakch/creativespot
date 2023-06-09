@@ -337,7 +337,6 @@ const ChatView = () => {
   return (
     <div className="grid grid-cols-4 gap-x-6">
       <div className="col-span-1 flex flex-col gap-y-3 rounded-3xl bg-cs-dark-800 p-6">
-        <pre> {JSON.stringify(chatsPopulated)}</pre>
         {chats &&
           chats.length > 0 &&
           chatsPopulated &&
