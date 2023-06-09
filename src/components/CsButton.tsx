@@ -37,7 +37,8 @@ const CsButton = ({
     classNames.push("rounded-3xl");
   }
   if (filled) {
-    classNames.push("bg-primary");
+    classNames.push("bg-cs-primary");
+    classNames.push("!border-cs-primary");
   }
   if (className) {
     className.split(" ").forEach((el) => classNames.push(el));
