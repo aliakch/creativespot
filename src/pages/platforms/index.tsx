@@ -23,6 +23,12 @@ const PlatformsPage = () => {
     console.log(options);
     for (const key of Object.keys(options)) {
       // @ts-expect-error all ok
+      if (options[key] instanceof Date) {
+        // @ts-expect-error all ok
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        options[key] = options[key].getTime();
+      }
+      // @ts-expect-error all ok
       if (options[key] === undefined || options[key] == null) {
         // @ts-expect-error all ok
         // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-dynamic-delete

@@ -1,5 +1,6 @@
 import { type EstateType, type Metro } from "@prisma/client";
 import { AutoComplete } from "primereact/autocomplete";
+import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { useEffect, useState } from "react";
@@ -17,6 +18,8 @@ export interface PlatformListingFilterOptions {
   price_to: number | null;
   area_from: number | null;
   area_to: number | null;
+  date_from: Date | null;
+  date_to: Date | null;
 }
 
 const PlatformListingFilter = ({
@@ -31,6 +34,8 @@ const PlatformListingFilter = ({
     price_to: null,
     area_from: null,
     area_to: null,
+    date_from: null,
+    date_to: null,
   });
   const [filteredMetroStations, setFilteredMetroStations] =
     useState<Metro[]>(metroStations);
@@ -48,7 +53,9 @@ const PlatformListingFilter = ({
       | "price_from"
       | "price_to"
       | "area_from"
-      | "area_to",
+      | "area_to"
+      | "date_from"
+      | "date_to",
     event: HandleInputEvent
   ) => {
     setFilters({ ...filters, [prop]: event.value });
@@ -140,6 +147,28 @@ const PlatformListingFilter = ({
           value={filters.area_to}
           onChange={(e) => {
             handleInputChange("area_to", e);
+          }}
+          placeholder="до"
+        />
+      </div>
+
+      <div className="flex flex-col gap-y-2 font-medium">
+        <label htmlFor="date_from">Даты бронирования</label>
+        <Calendar
+          className="block w-full"
+          inputId="date_from"
+          value={filters.date_from}
+          onChange={(e) => {
+            handleInputChange("date_from", e);
+          }}
+          placeholder="от"
+        />
+        <Calendar
+          className="block w-full"
+          inputId="date_to"
+          value={filters.date_to}
+          onChange={(e) => {
+            handleInputChange("date_to", e);
           }}
           placeholder="до"
         />

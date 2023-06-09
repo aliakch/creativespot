@@ -64,3 +64,7 @@
   flex-direction: column;
   min-height: 100vh;
 }
+
+.p-calendar.w-full input {
+  width: 100%;
+}
