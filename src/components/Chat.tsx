@@ -1,7 +1,7 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { type Chat, type User } from "@prisma/client";
+import { type Chat, type ChatMessage, type User } from "@prisma/client";
 import { useRouter } from "next/router";
 import { InputText } from "primereact/inputtext";
 import { useEffect, useState } from "react";
@@ -11,7 +11,6 @@ import { connect } from "socket.io-client";
 
 import userState from "@/store/user";
 import { apiClient } from "@/utils/api";
-import { generateChatId } from "@/utils/string-helper";
 
 import chatState from "../store/chat";
 
@@ -41,15 +40,8 @@ const ChatUser = ({
     </div>
   );
 };
-
-export interface Message {
-  id: number;
-  from: string;
-  to: string;
-  text: string;
-}
 interface ChatMessagingProps {
-  to?: User;
+  currentChatId?: string;
 }
 const connection = connect("http://localhost:3000", {
   path: "/api/messaging",
@@ -60,56 +52,129 @@ connection.on("connect", () => {
   console.log("connected!");
 });
 
-const ChatMessaging = ({ to }: ChatMessagingProps) => {
+connection.onAny((event, ...args) => {
+  console.log(event, args);
+});
+
+const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
+  // me - to get current user
   const me = useRecoilValue(userState);
   const router = useRouter();
+  // chat ID and data
+  const [chatId, setChatId] = useState<string | undefined>(currentChatId);
+  const [chatData, setChatData] = useState<Chat | false>(false);
+  const [chatLoaded, setChatLoaded] = useState(true);
+  // current input message
   const [msg, setMsg] = useState("");
-  const [user, setUser] = useState<User | undefined>(to);
-  const [newPeer, setNewPeer] = useState(false);
+  // user
+  const [users, setUser] = useState<User | false>(false);
+  // peer
+  const [peer, setPeer] = useState<User | false>(false);
 
-  const chat = useRecoilValue(chatState);
-  const setChat = useSetRecoilState(chatState);
+  // chat history
+  const chatHistory = useRecoilValue(chatState);
+  const setChatHistory = useSetRecoilState(chatState);
 
-  connection.on("message", (message: Message) => {
-    setChat([...chat, ...[message]]);
+  // create chat in database if not found
+  const createChatIfNotExists = async (
+    userId: string,
+    peerId: string,
+    estateId: string
+  ) => {
+    const response = await apiClient.users.createChat.query({
+      user_from: userId,
+      user_to: peerId,
+      estate_id: estateId,
+    });
+    setChatId(response.id);
+    setChatData(response);
+    void getMessageHistory(response.id);
+  };
+
+  // get chat data if chat id exists
+  const getChatDataById = async (chatId: string) => {
+    const response = await apiClient.users.getChatByCode.query({
+      chat_id: chatId,
+    });
+    if (response !== null) {
+      setChatData(response);
+    }
+  };
+
+  useEffect(() => {
+    if (!chatId || chatId === "") {
+      console.log(chatId);
+      console.log("getting chat id...");
+      void getChatDataById(chatId);
+    }
+  }, []);
+
+  // trigger chat creation if not exists
+  useEffect(() => {
+    console.log("trying to trigger chat load");
+    console.log(chatLoaded);
+    console.log(me);
+    console.log(chatId);
+    if (!chatLoaded && me && (!chatId || chatId === "")) {
+      console.log("triggering chat creation");
+      console.log(chatLoaded);
+      const peerId = router.query.peer_id as string | undefined;
+      const estateId = router.query.estate_id as string | undefined;
+      if (peerId && estateId) {
+        void createChatIfNotExists(me.id, peerId, estateId);
+      }
+      setChatLoaded(true);
+    }
+  }, [chatLoaded, me]);
+
+  useEffect(() => {
+    setChatLoaded(false);
+  }, []);
+
+  const getMessageHistory = async (chatId: string) => {
+    console.log("getting message history...");
+    const results = await apiClient.users.getChatHistory.query({
+      chatId,
+    });
+    if (results !== null) {
+      setChatHistory(results);
+    }
+  };
+
+  const getUser = async (id: string) => {
+    const peerResponse = await apiClient.users.getById.query({ id });
+    if (peerResponse) {
+      setPeer(peerResponse);
+    }
+  };
+
+  useEffect(() => {
+    if (chatId && chatId !== "") {
+      console.log("chat found!");
+      const peerId = router.query.peer_id as string | undefined;
+      if (peer !== undefined) {
+        void getUser(peerId);
+        void getMessageHistory(chatId);
+      }
+    }
+  }, [chatId]);
+
+  // if (chatId) {
+  //   void getMessageHistory(chatId);
+  // }
+
+  // get new messages on socket.io poll
+  connection.on("message", (message: ChatMessage) => {
+    setChatHistory([...chatHistory, ...[message]]);
   });
 
-  const getUserFromQueryIfNotExists = async () => {
-    if (!newPeer) {
-      if (to === undefined) {
-        const id = router.query.id as string | undefined;
-        if (id) {
-          const newUser = await apiClient.users.getById.query({ id });
-          if (newUser) {
-            setUser(newUser);
-            setNewPeer(true);
-          }
-        }
-      }
-    }
-  };
-  void getUserFromQueryIfNotExists();
-
-  const getMessageHistory = async () => {
-    if (to) {
-      const results = await apiClient.users.getChatHistory.query({
-        peer: to.id,
-      });
-      if (results) {
-        const parsed = results.map((r) => JSON.parse(r) as unknown as Message);
-        setChat(parsed);
-      }
-    }
-  };
-  void getMessageHistory();
-
   const handleInput = async () => {
-    if (user && me) {
+    if (peer !== false && me) {
       const newMessage = {
-        id: Math.floor(Math.random() * 100000000),
-        from: me.id,
-        to: user.id,
-        text: msg,
+        user_from: me.id,
+        user_to: peer.id,
+        content: msg,
+        chat_id: chatId,
       };
 
       const response = await fetch("/api/chat/", {
@@ -118,7 +183,6 @@ const ChatMessaging = ({ to }: ChatMessagingProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          isNew: newPeer,
           message: newMessage,
         }),
       });
@@ -128,34 +192,36 @@ const ChatMessaging = ({ to }: ChatMessagingProps) => {
 
   return (
     <>
-      {user && me && (
+      {peer && (
         <div className="max-w-2xl">
           <h4 className="mb-4 text-3xl font-semibold">
-            {user.first_name} {user.last_name}
+            {peer.first_name} {peer.last_name}
           </h4>
-          {/* <ScrollToBottom> */}
-          <div className="flex flex-col gap-2">
-            {chat.map((message) => (
-              <div
-                key={message.id}
-                className={`
+          <ScrollToBottom>
+            <div className="flex flex-col gap-2">
+              {chatHistory.map((message) => (
+                <div
+                  key={message.id}
+                  className={`
                 flex flex-wrap
-                ${me.id === message.from ? "justify-end" : "justify-start"}
+                ${
+                  me.id === message.userFromId ? "justify-end" : "justify-start"
+                }
                 `}
-              >
-                <p
-                  className={`rounded-xl  px-4 py-3 text-sm font-medium ${
-                    me.id === message.from
-                      ? "rounded-br-none bg-cs-primary"
-                      : "rounded-bl-none bg-cs-dark-800 "
-                  }`}
                 >
-                  {message.text}
-                </p>
-              </div>
-            ))}
-          </div>
-          {/* </ScrollToBottom> */}
+                  <p
+                    className={`rounded-xl  px-4 py-3 text-sm font-medium ${
+                      me.id === message.userFromId
+                        ? "rounded-br-none bg-cs-primary"
+                        : "rounded-bl-none bg-cs-dark-800 "
+                    }`}
+                  >
+                    {message.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </ScrollToBottom>
           <div className="mt-3 flex flex-wrap items-center gap-x-3">
             <InputText
               className="grow"
@@ -179,30 +245,40 @@ const ChatMessaging = ({ to }: ChatMessagingProps) => {
 };
 
 type ChatListItem = Chat & {
-  users: Array<{
-    id: string;
-    first_name: string;
-    last_name: string;
-  }>;
+  userFrom: User;
+  userTo: User;
+  // users: Array<{
+  //   id: string;
+  //   first_name: string;
+  //   last_name: string;
+  // }>;
   active?: boolean | undefined;
-  chatId?: string;
+  // chatId?: string;
 };
 const ChatView = () => {
   const router = useRouter();
   const me = useRecoilValue(userState);
+  // chat list
   const [chats, setChats] = useState<ChatListItem[] | false>(false);
-  const [chatsLoaded, setChatsLoaded] = useState(false);
+  // whether chat list is loaded
+  const [chatsLoaded, setChatsLoaded] = useState(true);
+  // whether chats are populated (boolean) - e.g. have active state
   const [chatsPopulated, setChatsPopulated] = useState(false);
-  const [activeUserId, setActiveUserId] = useState("");
-  const [activeUser, setActiveUser] = useState();
+  // active chat id
+  const [activeChatId, setActiveChatId] = useState("");
 
   useEffect(() => {
     if (!chatsLoaded) {
       apiClient.users.getChats
         .query()
         .then((res) => {
+          console.log("res");
+          console.log(res);
           if (res) {
-            setChats(res);
+            console.log(res);
+            if (res.length > 0) {
+              setChats(res);
+            }
             setChatsLoaded(true);
           }
         })
@@ -210,39 +286,36 @@ const ChatView = () => {
           console.log(err);
         });
     }
+  }, [chatsLoaded]);
+
+  useEffect(() => {
+    setChatsLoaded(false);
   }, []);
 
   useEffect(() => {
     if (chatsLoaded) {
       if (chats !== false || (Array.isArray(chats) && chats.length > 0)) {
-        if (chats[0]?.chatId === undefined) {
-          if (chats === false || me === false) return;
-          setChats(
-            chats.map((chat) => {
-              return {
-                ...chat,
-                ...{
-                  // @ts-expect-error all ok
-                  chatId: generateChatId(chat.users[0]?.id, chat.users[1]?.id),
-                  active: false,
-                  users: chat.users.filter((u) => u.id !== me.id),
-                },
-              };
-            })
-          );
-          setChatsPopulated(true);
-        }
+        if (chats === false || me === false) return;
+        setChats(
+          chats.map((chat) => {
+            return {
+              ...chat,
+              ...{
+                active: false,
+              },
+            };
+          })
+        );
+        setChatsPopulated(true);
       }
     }
-  }, [chatsLoaded, chats, me]);
+  }, [chatsLoaded, me]);
 
-  const handleUserClick = (userId: string) => {
+  const handleUserClick = (id: string) => {
     if (chats !== false && chats.length > 0) {
       const chatsUpdated = chats.map((chat) => {
-        if (chat.users[0]?.id === userId) {
-          setActiveUserId(chat.users[0]?.id);
-          // @ts-expect-error all ok
-          setActiveUser(chat.users[0]);
+        if (chat.id === id) {
+          setActiveChatId(chat.id);
           return { ...chat, ...{ active: true } };
         } else {
           return { ...chat, ...{ active: false } };
@@ -252,19 +325,32 @@ const ChatView = () => {
     }
   };
 
+  const getPeer = (userFrom: User, userTo: User) => {
+    if (me) {
+      if (userFrom.id !== me.id) {
+        return userFrom;
+      }
+    }
+    return userTo;
+  };
+
   return (
     <div className="grid grid-cols-4 gap-x-6">
       <div className="col-span-1 flex flex-col gap-y-3 rounded-3xl bg-cs-dark-800 p-6">
+        <pre> {JSON.stringify(chatsPopulated)}</pre>
         {chats &&
           chats.length > 0 &&
           chatsPopulated &&
           chats.map((chat) => (
             <ChatUser
-              key={chat.users[0]?.id}
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              label={`${chat.users[0]?.first_name} ${chat.users[0]?.last_name}`}
-              userId={chat.users[0]?.id as unknown as string}
-              handleClick={handleUserClick}
+              key={chat.id}
+              label={`${getPeer(chat.userFrom, chat.userTo).first_name} ${
+                getPeer(chat.userFrom, chat.userTo).last_name
+              }`}
+              userId={getPeer(chat.userFrom, chat.userTo).id}
+              handleClick={() => {
+                handleUserClick(chat.id);
+              }}
             />
           ))}
         {!chats ||
@@ -273,7 +359,9 @@ const ChatView = () => {
           ))}
       </div>
       <div className="col-span-3">
-        {(activeUserId || router.query.id) && <ChatMessaging to={activeUser} />}
+        {(activeChatId || router.query.peer_id) && (
+          <ChatMessaging currentChatId={activeChatId} />
+        )}
       </div>
     </div>
   );

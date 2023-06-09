@@ -44,15 +44,15 @@ model Session {
 }
 
 model User {
-  id              String       @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String?
   login           String
   is_active       Boolean
   first_name      String
   last_name       String
-  user_role       UserRole     @relation(fields: [userRoleId], references: [id])
+  user_role       UserRole      @relation(fields: [userRoleId], references: [id])
   userRoleId      String
-  email           String?      @unique
+  email           String?       @unique
   emailVerified   DateTime?
   password        String
   image           String?
@@ -64,10 +64,12 @@ model User {
   favorites       String[]
   reviews         UserReview[]
   Estate          Estate[]
-  chatsFrom       Chat[]       @relation("chatsFrom")
-  chatsTo         Chat[]       @relation("chatsTo")
-  created_at      DateTime     @default(now())
-  updated_at      DateTime     @default(now())
+  chatsFrom       Chat[]        @relation("chatsFrom")
+  chatsTo         Chat[]        @relation("chatsTo")
+  messagesFrom    ChatMessage[] @relation("messagesFrom")
+  messagesTo      ChatMessage[] @relation("messagesTo")
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @default(now())
 }
 
 model UserRole {
@@ -95,6 +97,7 @@ model Estate {
   presentation   String?
   active         Boolean?
   EstateBusyTime EstateBusyTime[]
+  chats          Chat[]
 }
 
 model EstateType {
@@ -114,7 +117,7 @@ model EstateBusyTime {
   estateId     String
   document_url String?
   chat         Chat?     @relation(fields: [chatId], references: [id])
-  chatId       String?    @unique
+  chatId       String?   @unique
 }
 
 model UserReview {
@@ -140,6 +143,22 @@ model Chat {
   chatFromId     String
   chatToId       String
   estate_booking EstateBusyTime?
+  messages       ChatMessage[]
+  estate         Estate @relation(fields: [estateId], references: [id])
+  estateId     String
+}
+
+model ChatMessage {
+  id         String   @id @unique @default(cuid())
+  content    String
+  created_at DateTime @default(now())
+  type       String
+  Chat       Chat?    @relation(fields: [chatId], references: [id])
+  chatId     String?
+  userFrom   User     @relation("messagesFrom", fields: [userFromId], references: [id])
+  userTo     User     @relation("messagesTo", fields: [userToId], references: [id])
+  userFromId String
+  userToId   String
 }
 
 model VerificationToken {

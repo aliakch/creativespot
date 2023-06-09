@@ -135,7 +135,7 @@ export default function PlatformDetailView({
                     className="text-sm"
                     rounded
                     type="link"
-                    href={`/messages/?id=${item.user.id}`}
+                    href={`/messages/?peer_id=${item.user.id}&estate_id=${item.id}`}
                   >
                     Написать сообщение
                   </CsButton>

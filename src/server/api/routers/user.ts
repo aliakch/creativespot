@@ -9,9 +9,6 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { prisma } from "@/server/db";
-import { redis } from "@/server/redis";
-import { generateChatId } from "@/utils/string-helper";
-
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
     const email = ctx.session.user.email;
@@ -219,6 +216,46 @@ export const userRouter = createTRPCRouter({
         message: "Пользователь не найден",
       };
     }),
+  createChat: protectedProcedure
+    .input(
+      z.object({
+        user_from: z.string(),
+        user_to: z.string(),
+        estate_id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const results = await ctx.prisma.chat.create({
+        data: {
+          estate: { connect: { id: input.estate_id } },
+          userFrom: { connect: { id: input.user_from } },
+          userTo: { connect: { id: input.user_to } },
+        },
+        include: {
+          userFrom: true,
+          userTo: true,
+        },
+      });
+      return results;
+    }),
+  getChatByCode: protectedProcedure
+    .input(
+      z.object({
+        chat_id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const results = await ctx.prisma.chat.findFirst({
+        where: {
+          id: input.chat_id,
+        },
+        include: {
+          userFrom: true,
+          userTo: true,
+        },
+      });
+      return results;
+    }),
   getChats: protectedProcedure.query(async ({ ctx }) => {
     const email = ctx.session.user.email as unknown as string;
     const user = await prisma.user.findUnique({
@@ -228,9 +265,28 @@ export const userRouter = createTRPCRouter({
     });
     if (user) {
       const results = await prisma.chat.findMany({
-        where: { users: { some: { id: user.id } } },
+        where: {
+          OR: [
+            {
+              userFrom: {
+                id: {
+                  equals: user.id,
+                },
+              },
+            },
+            {
+              userTo: {
+                id: {
+                  equals: user.id,
+                },
+              },
+            },
+          ],
+        },
         include: {
-          users: true,
+          userFrom: true,
+          userTo: true,
+          estate_booking: true,
         },
       });
       return results;
@@ -239,7 +295,7 @@ export const userRouter = createTRPCRouter({
   getChatHistory: protectedProcedure
     .input(
       z.object({
-        peer: z.string(),
+        chatId: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -250,10 +306,17 @@ export const userRouter = createTRPCRouter({
         },
       });
       if (user) {
-        const threadId = generateChatId(user.id, input.peer);
-        const thread = await redis.lRange(threadId, 0, -1);
-        return thread;
+        const chat = await prisma.chatMessage.findMany({
+          where: {
+            chatId: { equals: input.chatId },
+          },
+          orderBy: {
+            created_at: "asc",
+          },
+        });
+        return chat;
       }
+      return null;
     }),
   getById: protectedProcedure
     .input(
