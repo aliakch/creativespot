@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   type Estate,
+  type EstateBusyTime,
   type EstateType,
   type Metro,
   type User,
@@ -39,6 +40,7 @@ export type PlatformPopulated = Estate & {
   estate_type: EstateType;
   user: User;
   metro: Metro | null;
+  EstateBusyTime: EstateBusyTime[];
 };
 
 export default function PlatformDetailView({
@@ -184,8 +186,8 @@ export default function PlatformDetailView({
       <h4 className="mt-8 text-2xl font-semibold text-white">
         Календарь бронирования
       </h4>
-      <div className="flex gap-x-16">
-        <CalendarView />
+      <div className="flex flex-wrap gap-x-8">
+        <CalendarView busyTimes={item.EstateBusyTime} />
       </div>
     </section>
   );

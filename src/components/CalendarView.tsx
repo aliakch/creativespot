@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
 import {
   add,
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
@@ -18,7 +19,6 @@ import {
   startOfWeek,
   startOfYesterday,
 } from "date-fns";
-import { ru } from "date-fns/locale";
 import { useState } from "react";
 
 const colStartClasses = [
@@ -38,7 +38,15 @@ const chunk = <T,>(xs: T[], n: number): T[][] => {
     : [xs.slice(0, n)].concat(chunk(xs.slice(n), n));
 };
 
-export const CalendarView = () => {
+interface BusyTime {
+  id: string;
+  date_from: Date;
+  date_to: Date;
+  status: string;
+  type: string;
+}
+
+export const CalendarView = ({ busyTimes }: { busyTimes: BusyTime[] }) => {
   const today = startOfToday();
   const [currentMonth, setCurrentMonth] = useState(format(today, "MMM-yyyy"));
   const [selectedDay, setSelectedDay] = useState(today);
@@ -61,6 +69,31 @@ export const CalendarView = () => {
   const getYearName = (idx: number): string => {
     return format(addMonths(firstDayCurrentMonth, idx), "yyyy");
   };
+  const getBusyTimesDates = () => {
+    const dateStrings: string[] = [];
+    busyTimes.forEach((el) => {
+      if (
+        format(el.date_from, "yyyy-MM-dd") === format(el.date_to, "yyyy-MM-dd")
+      ) {
+        dateStrings.push(format(el.date_from, "yyyy-MM-dd"));
+      } else {
+        if (el.date_from < el.date_to) {
+          let i = 0;
+          while (
+            format(addDays(el.date_from, i), "yyyy-MM-dd") <=
+            format(el.date_to, "yyyy-MM-dd")
+          ) {
+            dateStrings.push(format(addDays(el.date_from, i), "yyyy-MM-dd"));
+            i++;
+          }
+        }
+      }
+    });
+    return dateStrings;
+  };
+  const busyTimesDates = getBusyTimesDates();
+  const isBusyDate = (date: Date) =>
+    busyTimesDates.includes(format(date, "yyyy-MM-dd"));
 
   const getMonthName = (idx: number): string => {
     const selectedMonth = format(addMonths(firstDayCurrentMonth, idx), "MM");
@@ -97,9 +130,12 @@ export const CalendarView = () => {
     <>
       {daysIntoMonths.map((month, mIdx) => {
         return (
-          <div className="my-6 flex w-[380px] flex-col gap-2" key={mIdx}>
+          <div
+            className="my-6 flex w-[380px] flex-col flex-wrap gap-2"
+            key={mIdx}
+          >
             {/* calendar header */}
-            <div className="grid grid-cols-3">
+            <div className="grid grid-cols-1">
               <button
                 type="button"
                 onClick={prevMonth}
@@ -175,7 +211,7 @@ export const CalendarView = () => {
                       }
                       ${isEqual(today, day) ? "!bg-cs-primary" : ""}
                       ${
-                        isBefore(day, today)
+                        isBefore(day, today) || isBusyDate(day)
                           ? "cursor-not-allowed bg-[#171717] font-semibold !text-red-600 opacity-70"
                           : ""
                       }
@@ -200,13 +236,14 @@ export const CalendarView = () => {
                           : ""
                       }
                     `}
-                          disabled={isBefore(day, today)}
+                          disabled={isBefore(day, today) || isBusyDate(day)}
                         >
-                          {isAfter(day, startOfYesterday()) && (
-                            <span className="-translate-x-.5 absolute top-0 z-10 hidden -translate-y-4 gap-1 rounded-md bg-slate-900 px-1 text-[11px] text-slate-100 group-hover:flex">
-                              <span>Доступно</span>
-                            </span>
-                          )}
+                          {isAfter(day, startOfYesterday()) &&
+                            !isBusyDate(day) && (
+                              <span className="-translate-x-.5 absolute top-0 z-10 hidden -translate-y-4 gap-1 rounded-md bg-slate-900 px-1 text-[11px] text-slate-100 group-hover:flex">
+                                <span>Доступно</span>
+                              </span>
+                            )}
 
                           <time
                             dateTime={format(day, "yyyy-MM-dd")}

@@ -159,7 +159,7 @@ export const platformRouter = createTRPCRouter({
               return {
                 type: "custom",
                 date_from: parse(item.date_from, "yyyy-MM-dd", new Date()),
-                date_to: parse(item.date_from, "yyyy-MM-dd", new Date()),
+                date_to: parse(item.date_to, "yyyy-MM-dd", new Date()),
                 status: "confirmed",
                 estateId: platformId,
               };

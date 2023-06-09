@@ -220,12 +220,15 @@ export default function MyPlatformsAddPage() {
   };
 
   const handleDeleteBusyTime = (id: string | number) => {
-    setBusyTimeValues(busyTimeValues.filter((el) => el.id !== id));
+    const filteredValues = busyTimeValues.filter((el) => el.id !== id);
+    setBusyTimeValues(filteredValues);
+    setValue("busy_time", filteredValues);
   };
 
   const busyTimeDeleteColumnTemplate = (item: FormInputBusyTime) => {
     return (
       <Button
+        type="button"
         // eslint-disable-next-line tailwindcss/no-custom-classname
         icon="pi pi-times"
         severity="danger"
@@ -449,11 +452,6 @@ export default function MyPlatformsAddPage() {
                     <Column field="status" header="Статус" />
                     <Column header="" body={busyTimeDeleteColumnTemplate} />
                   </DataTable>
-                  {/* {busyTimeValues.map((el, index) => (
-                    <p key={index}>
-                      От {el.date_from} до {el.date_to}
-                    </p>
-                  ))} */}
                   <BookingRangeDatepicker onSubmit={handleAddBusyTime} />
 
                   {getFormErrorMessage("booking_dates")}
