@@ -14,7 +14,7 @@ const MessageHandler = async (
       const { message } = req.body;
       let chatId = message.chat_id ?? "";
 
-      void prisma.chatMessage.create({
+      const newMessage = await prisma.chatMessage.create({
         data: {
           content: message.content,
           type: "message",

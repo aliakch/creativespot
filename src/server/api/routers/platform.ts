@@ -313,6 +313,8 @@ export const platformRouter = createTRPCRouter({
         price_to: z.number().optional(),
         area_from: z.number().optional(),
         area_to: z.number().optional(),
+        date_from: z.number().optional(),
+        date_to: z.number().optional(),
       })
     )
     .query(async ({ input }) => {
@@ -354,6 +356,8 @@ export const platformRouter = createTRPCRouter({
       if (input.area_to) {
         // @ts-expect-error all ok
         query.area.lte = input.area_to;
+      }
+      if (input.date_from && input.date_to === undefined) {
       }
       const results = await prisma.estate.findMany({
         where: query,

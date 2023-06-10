@@ -88,7 +88,17 @@ const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
     });
     setChatId(response.id);
     setChatData(response);
+    setPeer(getPeer(response.userFrom, response.userTo));
     void getMessageHistory(response.id);
+  };
+
+  const getPeer = (userFrom: User, userTo: User) => {
+    if (me) {
+      if (userFrom.id !== me.id) {
+        return userFrom;
+      }
+    }
+    return userTo;
   };
 
   // get chat data if chat id exists
@@ -98,32 +108,42 @@ const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
     });
     if (response !== null) {
       setChatData(response);
+      setPeer(getPeer(response.userFrom, response.userTo));
     }
   };
 
-  useEffect(() => {
-    if (!chatId || chatId === "") {
-      console.log(chatId);
-      console.log("getting chat id...");
-      void getChatDataById(chatId);
+  const getOrCreateChatDataFromUrl = async (
+    myId: string,
+    peerId: string,
+    estateId: string
+  ) => {
+    const response = await apiClient.users.getChatByUsersAndEstate.query({
+      user_id: myId,
+      peer_id: peerId,
+      estate_id: estateId,
+    });
+    if (response === null) {
+      await createChatIfNotExists(myId, peerId, estateId);
+    } else {
+      setChatId(response.id);
+      setChatData(response);
+      setPeer(getPeer(response.userFrom, response.userTo));
     }
-  }, []);
+  };
 
   // trigger chat creation if not exists
   useEffect(() => {
-    console.log("trying to trigger chat load");
-    console.log(chatLoaded);
-    console.log(me);
-    console.log(chatId);
+    // if there are peer id and estate id BUT chat id isn't set explicitly, try finding by peer and estate OR create chat if not found
     if (!chatLoaded && me && (!chatId || chatId === "")) {
-      console.log("triggering chat creation");
-      console.log(chatLoaded);
       const peerId = router.query.peer_id as string | undefined;
       const estateId = router.query.estate_id as string | undefined;
       if (peerId && estateId) {
-        void createChatIfNotExists(me.id, peerId, estateId);
+        void getOrCreateChatDataFromUrl(me.id, peerId, estateId);
       }
       setChatLoaded(true);
+    } else if (chatId) {
+      void getChatDataById(chatId);
+      void getMessageHistory(chatId);
     }
   }, [chatLoaded, me]);
 
@@ -132,36 +152,13 @@ const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
   }, []);
 
   const getMessageHistory = async (chatId: string) => {
-    console.log("getting message history...");
     const results = await apiClient.users.getChatHistory.query({
       chatId,
     });
-    if (results !== null) {
+    if (results != null) {
       setChatHistory(results);
     }
   };
-
-  const getUser = async (id: string) => {
-    const peerResponse = await apiClient.users.getById.query({ id });
-    if (peerResponse) {
-      setPeer(peerResponse);
-    }
-  };
-
-  useEffect(() => {
-    if (chatId && chatId !== "") {
-      console.log("chat found!");
-      const peerId = router.query.peer_id as string | undefined;
-      if (peer !== undefined) {
-        void getUser(peerId);
-        void getMessageHistory(chatId);
-      }
-    }
-  }, [chatId]);
-
-  // if (chatId) {
-  //   void getMessageHistory(chatId);
-  // }
 
   // get new messages on socket.io poll
   connection.on("message", (message: ChatMessage) => {
@@ -194,9 +191,14 @@ const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
     <>
       {peer && (
         <div className="max-w-2xl">
-          <h4 className="mb-4 text-3xl font-semibold">
-            {peer.first_name} {peer.last_name}
-          </h4>
+          <div className="mb-4 flex  flex-wrap items-center border-b border-cs-dark-800 pb-4">
+            <h4 className="block text-3xl font-semibold">
+              {peer.first_name} {peer.last_name}
+            </h4>
+            <CsButton type="button" rounded className="ml-auto">
+              Забронировать
+            </CsButton>
+          </div>
           <ScrollToBottom>
             <div className="flex flex-col gap-2">
               {chatHistory.map((message) => (
@@ -247,13 +249,7 @@ const ChatMessaging = ({ currentChatId }: ChatMessagingProps) => {
 type ChatListItem = Chat & {
   userFrom: User;
   userTo: User;
-  // users: Array<{
-  //   id: string;
-  //   first_name: string;
-  //   last_name: string;
-  // }>;
   active?: boolean | undefined;
-  // chatId?: string;
 };
 const ChatView = () => {
   const router = useRouter();
@@ -272,10 +268,7 @@ const ChatView = () => {
       apiClient.users.getChats
         .query()
         .then((res) => {
-          console.log("res");
-          console.log(res);
           if (res) {
-            console.log(res);
             if (res.length > 0) {
               setChats(res);
             }

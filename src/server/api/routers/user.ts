@@ -256,6 +256,37 @@ export const userRouter = createTRPCRouter({
       });
       return results;
     }),
+  getChatByUsersAndEstate: protectedProcedure
+    .input(
+      z.object({
+        user_id: z.string(),
+        peer_id: z.string(),
+        estate_id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const results = await ctx.prisma.chat.findFirst({
+        where: {
+          OR: [
+            {
+              estate: { id: { equals: input.estate_id } },
+              userFrom: { id: { equals: input.user_id } },
+              userTo: { id: { equals: input.peer_id } },
+            },
+            {
+              estate: { id: { equals: input.estate_id } },
+              userFrom: { id: { equals: input.peer_id } },
+              userTo: { id: { equals: input.user_id } },
+            },
+          ],
+        },
+        include: {
+          userFrom: true,
+          userTo: true,
+        },
+      });
+      return results;
+    }),
   getChats: protectedProcedure.query(async ({ ctx }) => {
     const email = ctx.session.user.email as unknown as string;
     const user = await prisma.user.findUnique({
