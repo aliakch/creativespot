@@ -4,7 +4,11 @@ import { parse } from "date-fns";
 import { z } from "zod";
 
 import { type FormInputBusyTime } from "@/pages/user/my-platforms/add";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { prisma } from "@/server/db";
 import { generateCode } from "@/utils/string-helper";
 
@@ -243,7 +247,7 @@ export const platformRouter = createTRPCRouter({
       }
       return false;
     }),
-  getByCode: protectedProcedure
+  getByCode: publicProcedure
     .input(
       z.object({
         code: z.string(),
@@ -263,7 +267,7 @@ export const platformRouter = createTRPCRouter({
       });
       return platform;
     }),
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(
       z.object({
         id: z.string(),
@@ -283,7 +287,7 @@ export const platformRouter = createTRPCRouter({
       });
       return platform;
     }),
-  getAdditional: protectedProcedure.query(async ({ input }) => {
+  getAdditional: publicProcedure.query(async ({ input }) => {
     const additionalPlatforms = await prisma.estate.findMany({
       take: 3,
       include: {
@@ -292,7 +296,7 @@ export const platformRouter = createTRPCRouter({
     });
     return additionalPlatforms;
   }),
-  getFilteredList: protectedProcedure
+  getFilteredList: publicProcedure
     .input(
       z.object({
         platform_type: z
@@ -368,10 +372,10 @@ export const platformRouter = createTRPCRouter({
       });
       return results;
     }),
-  getPlatformTypes: protectedProcedure.query(async () => {
+  getPlatformTypes: publicProcedure.query(async () => {
     return await prisma.estateType.findMany();
   }),
-  getMetro: protectedProcedure.query(async () => {
+  getMetro: publicProcedure.query(async () => {
     const stations = await prisma.metro.findMany();
     return stations;
   }),

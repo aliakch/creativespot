@@ -42,9 +42,10 @@ export default function Header() {
               <ul className="flex flex-wrap gap-x-14">
                 <HeaderFooterMenuLink href="/" text="Главная" />
                 <HeaderFooterMenuLink
-                  href={`${
-                    status === "authenticated" ? "/platforms/" : "/user/login"
-                  }`}
+                  // href={`${
+                  //   status === "authenticated" ? "/platforms/" : "/user/login"
+                  // }`}
+                  href="/platforms/"
                   text="Площадки"
                 />
               </ul>
